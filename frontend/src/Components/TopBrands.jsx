@@ -66,13 +66,13 @@ function TopBrands() {
 
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4  gap-6">
 
                     {brands.map((brand) => ( 
                         <Link key={brand.id} to={`/products?brand=${brand.name}`}
 
                             className="bg-[#191A20] border  border-white/10  rounded-2xl h-32  flex
-                             flex-col justify-center  gap-3  text-white transition-all duration-300 *: hover:-translate-y-1
+                             flex-col justify-center items-center  gap-3  text-white transition-all duration-300 *: hover:-translate-y-1
                                hover:border-indigo-500/40  hover:bg-[#23242C]">
 
                             <img src={brand.image} alt={brand.name}

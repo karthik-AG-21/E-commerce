@@ -53,6 +53,8 @@ const Register = () => {
             email: formData.email,
             password: formData.password,
             role: "customer",
+            isBlocked:false,
+            createdAt:Date.now() ,
             cart: [],
             wishlist: [],
             orders: [],

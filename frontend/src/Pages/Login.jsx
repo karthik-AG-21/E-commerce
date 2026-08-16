@@ -33,12 +33,19 @@ function Login() {
             localStorage.setItem("user", JSON.stringify(userDetails) )
 
 
-            toast.success(`Welcome ${user.name}!`);
+            
 
             if (user.role == "admin") {
-                navigate("/admin")
+                toast.success(`Welcome ${user.name}!`);
+                navigate("/Dashboard")
             } else {
-                navigate("/");
+                if(!user.isBlocked){
+                    toast.success(`Welcome ${user.name}!`);
+                    navigate("/");
+                }else{
+                    toast.error(`Your Blocked`);
+                }
+                
             }
 
         } catch (error) {

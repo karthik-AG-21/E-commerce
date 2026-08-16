@@ -19,6 +19,11 @@ import OrderComplete from "./Pages/OrdersSuccess"
 import Orders from "./Pages/Order"
 import Dashboard from "./Pages/Admin/Dashboard"
 import AdminRoute from "./routes/AdminRoute"
+import Users from "./Pages/Admin/Users"
+import AdminUsers from "./Pages/Admin/Users"
+import AdminOrders from "./Pages/Admin/Orders"
+import AdminProducts from "./Pages/Admin/Products"
+
 
 
 
@@ -49,12 +54,16 @@ function App() {
           <Route path="/orders"  element={<ProtectedRoute> <Orders/> </ProtectedRoute> }/>
 
 
-          <Route path="/admin" element={<AdminRoute><Dashboard/></AdminRoute>}/>
+          <Route path="/Dashboard" element={<AdminRoute><Dashboard/></AdminRoute>}/>
+          <Route path="/Dashboard/Admin-users" element={<AdminRoute><AdminUsers /></AdminRoute>}/>
+          <Route path="/Dashboard/Admin-orders" element={<AdminRoute><AdminOrders /></AdminRoute>}/>
+          <Route path="/Dashboard/Admin-products" element={<AdminRoute><AdminProducts/></AdminRoute>}/>
 
           
 
         </Routes>
       </BrowserRouter>
+
 
     </>
   )
