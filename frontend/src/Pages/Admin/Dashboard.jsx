@@ -1,4 +1,4 @@
-import AdminCalendar from "../../Components/Admin/AdminCalender";
+
 import Header from "../../Components/Admin/AdminHeader";
 import SideBar from "../../Components/Admin/AdminSidebar";
 import CategoryChart from "../../Components/Admin/CategoryChart";
@@ -53,7 +53,7 @@ function Dashboard() {
                     <div className="flex gap-5 w-full p-5">
 
                         <div className="w-2/3">
-                            <RevenueChart />
+                            <RevenueChart allOrders={allOrders} />
                         </div>
 
                         <div className="w-1/3">
@@ -62,14 +62,7 @@ function Dashboard() {
 
                     </div>
 
-                    <div className="flex w-full p-5 gap-5">
-                        <div>
-                            <AdminCalendar />
-                        </div>
-                        <div>
-
-                        </div>
-                    </div>
+                    
 
 
                 </main>

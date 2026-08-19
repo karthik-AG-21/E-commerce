@@ -6,8 +6,16 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { CiFilter } from "react-icons/ci";
 import { useState } from "react";
 import { FaHandLizard } from "react-icons/fa";
+import ProductForm from "../../Components/Admin/ProductForm";
+import useAddProduct from "../../hooks/Admin/useAddProducts";
+import useUpdateProduct from "../../hooks/Admin/useUpdateProducts";
+import useDeleteProduct from "../../hooks/Admin/useDeleteProduct";
+import { toast } from "react-toastify";
 
 function AdminProducts() {
+    const addProduct = useAddProduct();
+    const updateProduct = useUpdateProduct();
+    const deleteProduct = useDeleteProduct();
 
     const { data: products = [], prodIsLoading, prodError } = useMobiles();
 
@@ -17,6 +25,8 @@ function AdminProducts() {
 
     const [currentPage, setCurrentPage] = useState(1);
 
+    const [showForm, setShowForm] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
 
 
 
@@ -75,13 +85,82 @@ function AdminProducts() {
 
     const currentProducts = filteredProducts.slice(startIndex, lastIndex)
 
+    function handleProductSubmit(formData) {
+
+        if (!formData.title?.trim()) {
+        toast.error("Product name is required");
+        return;
+    }
+
+    if (!formData.category?.trim()) {
+        toast.error("Category is required");
+        return;
+    }
+
+    if (!formData.price || Number(formData.price) <= 0) {
+       toast.error("Price must be greater than 0");
+        return;
+    }
+
+    if (formData.stock === "" || Number(formData.stock) < 0) {
+        toast.error("Stock cannot be negative");
+        return;
+    }
+
+    if (formData.rating === "" || Number(formData.rating) < 0 || Number(formData.rating) > 5){
+        toast.error("Rating must be between 0 and 5");
+        return;
+    }
+
+        const productData = {
+            ...formData,
+            price: Number(formData.price),
+            stock: Number(formData.stock),
+            rating: Number(formData.rating),
+        };
+
+        // EDIT
+        if (editingProduct) {
+
+            updateProduct.mutate(
+                {
+                    id: editingProduct.id,
+                    product: productData,
+                },
+                {
+                    onSuccess: () => {
+                        setShowForm(false);
+                        setEditingProduct(null);
+                    },
+                }
+            );
+
+            return;
+        }
+
+
+        addProduct.mutate(productData, {
+            onSuccess: () => {
+                setShowForm(false);
+            },
+        });
+    }
+
+    const handleDelete = (id) => {
+        if (!window.confirm("Are you sure you want to delete ALL products?")) {
+            return;
+        }
+
+        deleteProduct.mutate(id);
+    };
+
 
     return (
-        <div className="flex w-full bg-indigo-900">
+        <div className="flex w-full bg-indigo-900 ">
 
             <SideBar />
 
-            <main className="ml-64  bg-[#0F1420] h-screen w-full">
+            <main className="ml-64  bg-[#0F1420] min-h-screen w-full">
 
                 <Header page="products" content="Dashboard/Products" />
 
@@ -111,11 +190,25 @@ function AdminProducts() {
                             </div>
                         </div>
                         <div>
-                            <button className="bg-white  text-zinc-700 font-bold text-sm px-3 py-2 rounded hover:bg-indigo-600 hover:text-white">+ Add Products</button>
+                            <button className="bg-white  text-zinc-700 font-bold 
+                            text-sm px-3 py-2 rounded hover:bg-indigo-600 hover:text-white"
+                                onClick={() => { setEditingProduct(null); setShowForm(true) }}>+ Add Products</button>
                         </div>
                     </div>
 
-                    <table className="w-full min-w-200 text-white">
+                   
+
+                         {showForm && (
+                        <ProductForm className="absolute z-100 top-0"
+                            product={editingProduct}
+                            onClose={() => setShowForm(false)}
+                            onSubmit={handleProductSubmit}
+                        />
+                    )}
+
+
+                    <table className="w-full min-w-200 text-white relative z-10">
+
 
                         <thead>
 
@@ -138,10 +231,6 @@ function AdminProducts() {
                                 <th className="text-left p-3">Rating</th>
 
                                 <th className="text-left p-3">Actions</th>
-
-
-
-
                             </tr>
 
                         </thead>
@@ -182,7 +271,7 @@ function AdminProducts() {
                                     </td>
 
 
-                                    <td className="p-3">
+                                    <td className="p-3 pl-6">
                                         <span className={item.stock <= 10 ? "text-red-400" : "text-green-400"} >{item.stock} </span>
                                     </td>
 
@@ -191,10 +280,13 @@ function AdminProducts() {
 
                                     <td className="p-3 flex gap-4  items-center">
                                         <div >
-                                            <MdOutlineModeEdit />
+                                            <MdOutlineModeEdit
+                                                onClick={() => { setEditingProduct(item); setShowForm(true); }} />
                                         </div>
+                                       
                                         <div>
-                                            <RiDeleteBin6Line />
+                                            <RiDeleteBin6Line   onClick={()=>handleDelete(item.id)}
+                                            disabled={deleteProduct.isPending} />
                                         </div>
                                     </td>
 
@@ -206,6 +298,8 @@ function AdminProducts() {
                             ))}
 
                         </tbody>
+
+                        
 
                     </table>
 
@@ -219,12 +313,10 @@ function AdminProducts() {
 
                         <span> Page {currentPage} of {totalPage}</span>
 
-                        <button
-                            disabled={currentPage === totalPage}
+                        <button disabled={currentPage === totalPage}
                             onClick={() => setCurrentPage(prev => prev + 1)}
                             className="px-3 py-2 bg-white text-indigo-900 rounded disabled:opacity-40">
-                            Next
-                        </button>
+                            Next </button>
                     </div>
 
                 </div>

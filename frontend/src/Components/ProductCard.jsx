@@ -26,7 +26,7 @@ function ProductCard({ product }) {
 
           
             <div className="flex-1 flex items-center justify-center px-4 pb-6">
-                <img src={ product.images[2] || product.images[1] || product.images[0] }
+                <img src={ product?.images[2] || product?.images[1] || product?.images[0] || product?.thumbnail }
                  alt={product.title} className="w-full h-56 object-contain"/>
             </div>
 

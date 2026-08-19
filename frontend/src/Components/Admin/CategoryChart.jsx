@@ -1,18 +1,43 @@
 
-import {PieChart,Pie,Cell,ResponsiveContainer,} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, } from "recharts";
 
-const categoryData = [
-    { name: "Smartphones", value: 120, color: "bg-red-500", chartColor: "#ef4444", },
-    { name: "Laptops", value: 80, color: "bg-blue-500", chartColor: "#3b82f6", },
-    { name: "Accessories", value: 60, color: "bg-green-500", chartColor: "#22c55e", },
-    { name: "Tablets", value: 40, color: "bg-yellow-500",chartColor: "#eab308", },
 
+const categoryConfig = [
+    {
+        name: "Smartphones",
+        category: "smartphones",
+        color: "bg-red-500",
+        chartColor: "#ef4444",
+    },
+    {
+        name: "Laptops",
+        category: "laptops",
+        color: "bg-blue-500",
+        chartColor: "#3b82f6",
+    },
+    {
+        name: "Accessories",
+        category: "mobile-accessories",
+        color: "bg-green-500",
+        chartColor: "#22c55e",
+    },
+    {
+        name: "Tablets",
+        category: "tablets",
+        color: "bg-yellow-500",
+        chartColor: "#eab308",
+    },
 ];
 
-const CategoryChart = ({products}) => {
-    const total = categoryData.reduce((sum, item) => sum + item.value,0);
 
-    console.log("Charts",products)
+
+
+const CategoryChart = ({ products = [] }) => {
+
+    const categoryData = categoryConfig.map((category) => ({ ...category, value: products.filter(
+            (product) => product.category === category.category).length,}));
+
+            console.log(categoryData)
 
     return (
         <div className="bg-[#111827] text-white backdrop-blur-md p-5 rounded-xl">
@@ -28,10 +53,10 @@ const CategoryChart = ({products}) => {
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
 
-                            <Pie data={categoryData}  dataKey="value" nameKey="name" innerRadius={60}
+                            <Pie data={categoryData} dataKey="value" nameKey="name" innerRadius={60}
                                 outerRadius={90} paddingAngle={2}>
                                 {categoryData.map((item, index) => (
-                                    <Cell key={index}  fill={item.chartColor}/> 
+                                    <Cell key={index} fill={item.chartColor} />
                                 ))}
                             </Pie>
 
@@ -70,7 +95,7 @@ const CategoryChart = ({products}) => {
                         ))
                     }
 
-        </div>
+                </div>
 
             </div>
         </div>

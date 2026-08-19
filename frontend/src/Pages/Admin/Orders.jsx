@@ -3,12 +3,15 @@ import Header from "../../Components/Admin/AdminHeader";
 import SideBar from "../../Components/Admin/AdminSidebar";
 import useGetUsers from "../../hooks/Admin/useGetUsers";
 import { useState } from "react";
+import useUpdateOrderStatus from "../../hooks/Admin/useUpdateOrderStatus";
 
 
 
 function AdminOrders() {
 
     const { data, isLoading, error } = useGetUsers()
+
+    const updateStatus = useUpdateOrderStatus()
 
     const [search, setSearch] = useState("")
     const [filter , setFilter] = useState("")
@@ -22,18 +25,25 @@ function AdminOrders() {
         return <h1>error</h1>
     }
 
-    const allOrders = data.map((item) => item?.orders).flat()
+   
 
-    console.log(allOrders)
+    // const allOrders = data.map((item) => item?.orders).flat()
+
+    const allOrders = data.flatMap((user) =>(user.orders || []).map((order) => ({...order,userId: user.id,})));
+
+    console.log(allOrders[0]?.userId)
 
     function handleSearch(e) {
         setSearch(e.target.value)
+        setCurrentPage(1);
     }
 
-    const filterData = allOrders.filter((item) => item?.address?.name.toLowerCase().includes(search.toLowerCase()))
+    const filterData = allOrders.filter((item) => item?.address?.name?.toLowerCase().includes(search.toLowerCase()) 
+    ||  item?.id?.toString().toLowerCase().includes(search.toLowerCase()))
 
     function handleFilter(e){
         setFilter(e.target.value)
+        setCurrentPage(1);
     }
 
     let filteredOrders = [...filterData];
@@ -51,7 +61,11 @@ function AdminOrders() {
         filteredOrders.sort((a,b)=> a.totalPrice - b.totalPrice)
     }
     if(filter == "high-low"){
-        filteredOrders.sort((a,b)=> b.totalPrice - a.totalPage)
+        filteredOrders.sort((a,b)=> b.totalPrice - a.totalPrice)
+    }
+
+    function handleStatusChange(userId, orderId, value){
+        updateStatus.mutate({userId:userId, orderId:orderId, status:value})
     }
 
     const itemsPerPage = 8;
@@ -101,7 +115,7 @@ function AdminOrders() {
                         <thead>
                             <tr className="border-b border-white/10 py-2 text-zinc-400">
 
-                                <th className="text-left p-4">Order id</th>
+                                <th className="text-left p-4">No</th>
                                 <th className="text-left p-4">Order id</th>
 
                                 <th className="text-left p-4">customer</th>
@@ -115,24 +129,24 @@ function AdminOrders() {
                         <tbody>
                             {currentOrders?.map((item, index) => (
                                 <tr key={item?.id} className="border-b border-white/10 py-2 text-zinc-200">
-                                    <td className="text-left p-4">{startIndex+index + 1}</td>
+                                    <td className="text-left p-3">{startIndex+index + 1}</td>
 
-                                    <td className="text-left p-4">{item.id}</td>
+                                    <td className="text-left  p-3">{item.id}</td>
 
-                                    <td className="text-left p-4">{item?.address?.name}</td>
+                                    <td className="text-left  p-3">{item?.address?.name}</td>
 
-                                    <td className="text-left p-4">{new Date(item?.orderedAt).toLocaleDateString("en-IN", {
+                                    <td className="text-left p-3">{new Date(item?.orderedAt).toLocaleDateString("en-IN", {
                                         day: "2-digit", month: "short", year: "numeric",
                                     })}</td>
-                                    <td className="text-left p-4">${item?.totalPrice}</td>
+                                    <td className="text-left p-3">${item?.totalPrice}</td>
 
-                                    <td className="text-left p-4">{item?.paymentMethod}</td>
+                                    <td className="text-left p-3 pl-12">{item?.paymentMethod}</td>
 
-                                    <td className="text-left p-4">{item?.status}</td>
-                                    <td className="text-left p-4">
+                                    <td className="text-left p-3">{item?.status}</td>
+                                    <td className="text-left p-3">
                                         <select
                                             value={item?.status}
-                                            onChange={(e) => handleStatusChange(item, e.target.value)}
+                                            onChange={(e) => handleStatusChange(item.userId, item.id ,e.target.value)}
                                             className=" bg-[#0F1420] text-white border
                                              border-white/10 rounded-lg px-3 py-2">
                                             <option value="Pending">Pending</option>

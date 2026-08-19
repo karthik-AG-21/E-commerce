@@ -26,7 +26,7 @@ function Login() {
             
             const user = await loginRequest(formData);
 
-            const userDetails = { name:user.name , email:user.email, role:user.role }
+            const userDetails = { name:user.name , email:user.email, role:user.role, id:user.id }
 
             localStorage.setItem("userId", user.id);
 

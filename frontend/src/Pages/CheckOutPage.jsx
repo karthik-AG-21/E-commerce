@@ -1,5 +1,5 @@
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "../Components/Header";
 import { useState } from "react";
 import { OrderSchema } from "../utils/OrderValidation";
@@ -7,7 +7,12 @@ import useAddAddress from "../hooks/useAddAddress";
 import usePlaceOrder from "../hooks/usePlaceOrder";
 import { useNavigate } from "react-router-dom";
 
+import useClearCart from "../hooks/useClearCart";
+import { clearCart } from "../redux/cartSlice";
+
 function Checkout() {
+
+    const dispatch = useDispatch();
 
     const navigate = useNavigate()
 
@@ -19,11 +24,14 @@ function Checkout() {
 
     const { mutate: saveAddress } = useAddAddress();
     const { mutate: placeOrder } = usePlaceOrder();
+    const { mutate: clearTheCart } = useClearCart();
 
     const totalPrice = cartItems.reduce(
         (total, item) => total + item.price * item.quantity,0);
 
     const userId = localStorage.getItem("userId");
+
+    console.log("userId is here", userId)
    
 
     function handleChange(e) {
@@ -33,45 +41,55 @@ function Checkout() {
     }
 
     function handleSubmit(e) {
-        e.preventDefault();
+    e.preventDefault();
 
-        const result = OrderSchema.safeParse(details);
+    const result = OrderSchema.safeParse(details);
 
-        if (!result.success) {
-            console.log(result.error);
-            return;
-        }
+    if (!result.success) {
+        console.log(result.error);
+        return;
+    }
 
-        saveAddress({ userId, address: details, }, {
-            onSuccess: () => {
-                placeOrder({  userId, cartItems,totalPrice, paymentMethod, address: details,},
+    saveAddress({userId,address: details,},
+        {onSuccess: () => {
+                placeOrder({ userId, cartItems, totalPrice, paymentMethod, address: details, },
                     { onSuccess: () => {
-                            
-                            navigate("/orderSuccess", {
-                                state: {
-                                    order: {
-                                        items: cartItems,
-                                        totalPrice,
-                                        paymentMethod,
-                                        address: details,
-                                    }
+                            clearTheCart(userId, {onSuccess: () => {dispatch(clearCart());
+                                    // Go to success page
+                                    navigate("/orderSuccess", {
+                                        state: {
+                                            order: {
+                                                items: cartItems,
+                                                totalPrice,
+                                                paymentMethod,
+                                                address: details,
+                                            }
+                                        }
+                                    });
+                                },
+
+                                onError: (err) => {
+                                    console.log(
+                                        "Failed to clear backend cart:",
+                                        err
+                                    );
                                 }
                             });
                         },
 
                         onError: (err) => {
-                            console.log(err);
+                            console.log("Failed to place order:", err);
                         },
                     }
                 );
             },
 
             onError: (err) => {
-                console.log(err);
+                console.log("Failed to save address:", err);
             },
         }
-        );
-    }
+    );
+}
 
     return (
         <div className="min-h-screen pt-25 bg-[#0B0B0F] text-white py-10">

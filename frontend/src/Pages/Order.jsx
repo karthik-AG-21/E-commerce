@@ -78,7 +78,7 @@ function Orders() {
 
 
                                             <span className="text-yellow-400">
-                                                {order.status}
+                                                {order?.status}
                                             </span>
 
 
