@@ -3,7 +3,7 @@ import { IoSearch } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
 const user = JSON.parse(localStorage.getItem("user"))
-const name = user.name.split("")[0].toUpperCase()
+const name = user?.name?.split("")[0]?.toUpperCase()
 
 function Header({page,content,role , }) {
     const navigate = useNavigate();

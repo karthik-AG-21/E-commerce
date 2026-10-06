@@ -117,7 +117,6 @@ function AdminOrders() {
 
                                 <th className="text-left p-4">No</th>
                                 <th className="text-left p-4">Order id</th>
-
                                 <th className="text-left p-4">customer</th>
                                 <th className="text-left p-4">Date</th>
                                 <th className="text-left p-4">Amount</th>
