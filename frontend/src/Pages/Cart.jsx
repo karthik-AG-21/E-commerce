@@ -20,7 +20,7 @@ function Cart() {
     const products = useSelector((state) => state.cart.items);
 
 
-    const { data: cart, isLoading } = useGetCart(user);
+    const { data: cart, isLoading } = useGetCart();
 
     useEffect(() => {
         if (cart) {
@@ -29,13 +29,11 @@ function Cart() {
     }, [cart, dispatch]);
 
     const updateDatabaseCart = (updatedCart) => {
-        if (!user) return;
-
         mutate({ userId: user, cart: updatedCart, });
     };
 
 
-    const totalPrice = products.reduce((total, item) => {
+    const totalPrice = products?.reduce((total, item) => {
         const discountedPrice = Math.ceil(
             item.price - (item.price / 100) * item.discountPercentage
         );

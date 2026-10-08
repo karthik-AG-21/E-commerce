@@ -40,7 +40,7 @@ export const register = async(req,res)=>{
         })
 
 
-        res.status(201).json({success:true, data:{id:user._id, name:user.name, email:user.email}, message:"register successfull"})
+        res.status(201).json({success:true, data:{id:user._id, role:user.role  , name:user.name, email:user.email}, message:"register successfull"})
 
     }catch(error){
         console.log(error);

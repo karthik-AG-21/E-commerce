@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
 import { CiUser } from "react-icons/ci";
 import { FaShoppingCart, FaRegHeart } from "react-icons/fa";
 import { IoIosLogOut } from "react-icons/io";
-
 import icon from "/shopping-bag.svg";
-import { id } from "zod/v4/locales";
 import useGetCart from "../hooks/useGetCart";
 import { setCart } from "../redux/cartSlice";
 import { setWishlist } from "../redux/wishlistSlice";

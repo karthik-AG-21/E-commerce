@@ -1,3 +1,6 @@
+import jwt from "jsonwebtoken"
+
+
 export const refreshAccessToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
@@ -26,6 +29,8 @@ export const refreshAccessToken = async (req, res) => {
         });
 
     } catch (error) {
+        console.log("REFRESH ERROR NAME:", error.name);
+    console.log("REFRESH ERROR MESSAGE:", error.message);
         res.status(401).json({
             success: false,
             message: "Refresh token expired or invalid"

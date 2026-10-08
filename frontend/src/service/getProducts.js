@@ -5,7 +5,7 @@ async function getProducts(category) {
 
     console.log(category, )
 
-   const res = await api.get("/?", {params:category && category !== "all" ? {category} : {}})
+   const res = await api.get("/products?", {params:category && category !== "all" ? {category} : {}})
 
     return res.data.data;
 }

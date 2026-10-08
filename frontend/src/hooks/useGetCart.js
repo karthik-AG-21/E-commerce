@@ -3,9 +3,8 @@ import getCart from "../service/getCart";
 
 function useGetCart(userId) {
   return useQuery({
-    queryKey: ["cart", userId],
-    queryFn: () => getCart(userId),
-    enabled: !!userId,
+    queryKey: ["cart"],
+    queryFn: () => getCart()
   });
 }
 

@@ -1,10 +1,11 @@
 import axios from "axios";
+import api from "../api/api.js";
 
-async function getWishlist(userId) {
+async function getWishlist() {
 
-    const { data } = await axios.get(`http://localhost:3000/users/${userId}`);
+    const  response = await api.get("/wishlist/get");
     
-    return data.wishlist;
+    return response.data.data.items;
 }
 
 export default getWishlist;

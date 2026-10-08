@@ -7,7 +7,7 @@ import api from "../api/api.js"
 async function getMobiles(){
     
 
-    const res = await api.get("/")
+    const res = await api.get("/products")
 
     return res.data.data
 }

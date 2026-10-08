@@ -1,9 +1,13 @@
 import axios from "axios";
+import api from "../api/api";
 
-async function getCart(userId) {
-  const { data } = await axios.get(`http://localhost:3000/users/${userId}`);
+async function getCart() {
 
-  return data.cart;
+  const response = await api.get("/cart/get")
+
+  console.log("h1",response.data.data);
+  return response.data.data.items;
+  
 }
 
 export default getCart;

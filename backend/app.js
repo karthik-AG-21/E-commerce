@@ -7,6 +7,7 @@ import authRouter from './routers/authRouter.js';
 import cookieParser from 'cookie-parser';
 import cors from "cors";
 import cartRouter from './routers/cartRouter.js';
+import wishlistRouter from './routers/wishlistRouter.js';
 
 dotenv.config();
 
@@ -22,11 +23,13 @@ app.use(morgan("dev"));
 await connectDB();
 
 
-app.use("/", router);
+app.use("/products", router);
 
 app.use("/",authRouter);
 
-app.use("/", cartRouter)
+app.use("/cart", cartRouter);
+
+app.use("/wishlist", wishlistRouter);
 
 
 app.get("/",(req,res)=>{
