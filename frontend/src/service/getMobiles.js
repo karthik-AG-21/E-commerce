@@ -1,4 +1,5 @@
 import axios from "axios";
+import api from "../api/api.js"
 
 
 
@@ -6,9 +7,9 @@ import axios from "axios";
 async function getMobiles(){
     
 
-    const res = await axios.get("http://localhost:3000/products")
+    const res = await api.get("/")
 
-    return res.data
+    return res.data.data
 }
 
 export default getMobiles;

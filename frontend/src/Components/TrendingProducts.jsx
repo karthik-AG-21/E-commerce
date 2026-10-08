@@ -15,7 +15,7 @@ function TrendingProducts() {
     const navigate = useNavigate()
 
     const { data, isLoading, error } = useMobiles();
-    // console.log("fetch", data)
+    console.log("fetch", data)
 
     let filteredMobile = useMemo(() => {
         if (!data) {

@@ -48,51 +48,51 @@ const Register = () => {
         setErrors({});
 
         const user = {
-
             name: formData.name,
             email: formData.email,
             password: formData.password,
-            role: "customer",
-            isBlocked:false,
-            createdAt:Date.now() ,
-            cart: [],
-            wishlist: [],
-            orders: [],
-            address: [],
-                
-            
-
         };
 
         registerMutation.mutate(user, {
 
             onSuccess: (newUser) => {
 
-                localStorage.setItem("userId", newUser.id);
+                const data = newUser.data
 
-                const userData = {role:newUser.role , name:newUser.name, email:newUser.email}
+                console.log(data,"dhdhd")
 
-                localStorage.setItem("user",JSON.stringify(userData) )
+                localStorage.setItem("userId", data?.id);
 
-                toast.success(`Welcome ${userData.name}!`);
+                const userData = { name: data.name, email: data.email }
 
-                navigate("/");
+                localStorage.setItem("user", JSON.stringify(userData))
+
+                toast.success(`Welcome ${userData?.name}!`);
+
+                if(data?.role == "customer"){
+                    navigate("/");
+                }else{
+                    navigate("/Dashboard");
+                }
+                
 
             },
 
             onError: (error) => {
 
-                if (error.message === "Email already exists") {
+                const status = error.response?.status;
+                const message = error.response?.data?.message;
+
+                if (status === 409) {
 
                     setErrors({
 
                         email: ["Email already exists"]
-
                     });
 
                 } else {
 
-                    alert("Registration failed");
+                    alert( message || "Registration failed");
 
                 }
 
@@ -101,48 +101,48 @@ const Register = () => {
         });
 
     };
-   return (
-    <div className="relative min-h-screen bg-[#0B0B0F] flex items-center justify-center overflow-hidden">
+    return (
+        <div className="relative min-h-screen bg-[#0B0B0F] flex items-center justify-center overflow-hidden">
 
-        
 
-        <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-600/20 blur-[120px] rounded-full"></div>
 
-        <div className="absolute bottom-10 right-10 w-72 h-72 bg-blue-500/20 blur-[120px] rounded-full"></div>
+            <div className="absolute top-10 left-10 w-72 h-72 bg-indigo-600/20 blur-[120px] rounded-full"></div>
 
-        
+            <div className="absolute bottom-10 right-10 w-72 h-72 bg-blue-500/20 blur-[120px] rounded-full"></div>
 
-        <form
-            onSubmit={handleSubmit}
-            className="relative z-10 w-full max-w-md bg-[#191A20] border border-white/10 rounded-3xl p-8 shadow-2xl">
 
-            <div className="text-center mb-8">
 
-                <h1 className="text-3xl font-bold text-white">
-                    Create Account
-                </h1>
+            <form
+                onSubmit={handleSubmit}
+                className="relative z-10 w-full max-w-md bg-[#191A20] border border-white/10 rounded-3xl p-8 shadow-2xl">
 
-                <p className="text-zinc-400 mt-2">
-                    Join TechStore and start shopping today.
-                </p>
+                <div className="text-center mb-8">
 
-            </div>
+                    <h1 className="text-3xl font-bold text-white">
+                        Create Account
+                    </h1>
 
-            {/* Name */}
+                    <p className="text-zinc-400 mt-2">
+                        Join TechStore and start shopping today.
+                    </p>
 
-            <div className="mb-5">
+                </div>
 
-                <label className="text-white text-sm">
-                    Full Name
-                </label>
+                {/* Name */}
 
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="
+                <div className="mb-5">
+
+                    <label className="text-white text-sm">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Enter your full name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="
                     mt-2
                     w-full
                     rounded-xl
@@ -157,28 +157,28 @@ const Register = () => {
                     focus:border-indigo-500
                     "/>
 
-                {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">
-                        {errors.name[0]}
-                    </p>
-                )}
+                    {errors.name && (
+                        <p className="text-red-500 text-sm mt-1">
+                            {errors.name[0]}
+                        </p>
+                    )}
 
-            </div>
+                </div>
 
-           
-            <div className="mb-5">
 
-                <label className="text-white text-sm">
-                    Email Address
-                </label>
+                <div className="mb-5">
 
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="
+                    <label className="text-white text-sm">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="
                     mt-2
                     w-full
                     rounded-xl
@@ -193,28 +193,28 @@ const Register = () => {
                     focus:border-indigo-500
                     "/>
 
-                {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">
-                        {errors.email[0]}
-                    </p>
-                )}
+                    {errors.email && (
+                        <p className="text-red-500 text-sm mt-1">
+                            {errors.email[0]}
+                        </p>
+                    )}
 
-            </div>
+                </div>
 
 
-            <div className="mb-5">
+                <div className="mb-5">
 
-                <label className="text-white text-sm">
-                    Password
-                </label>
+                    <label className="text-white text-sm">
+                        Password
+                    </label>
 
-                <input
-                    type="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="
                     mt-2
                     w-full
                     rounded-xl
@@ -229,27 +229,27 @@ const Register = () => {
                     focus:border-indigo-500
                     "/>
 
-                {errors.password && (
-                    <p className="text-red-500 text-sm mt-1">
-                        {errors.password[0]}
-                    </p>
-                )}
+                    {errors.password && (
+                        <p className="text-red-500 text-sm mt-1">
+                            {errors.password[0]}
+                        </p>
+                    )}
 
-            </div>
+                </div>
 
-           
 
-            <div className="mb-6">
 
-                <label className="text-white text-sm"> Confirm Password</label>
+                <div className="mb-6">
 
-                <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm your password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="
+                    <label className="text-white text-sm"> Confirm Password</label>
+
+                    <input
+                        type="password"
+                        name="confirmPassword"
+                        placeholder="Confirm your password"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className="
                     mt-2
                     w-full
                     rounded-xl
@@ -264,20 +264,20 @@ const Register = () => {
                     focus:border-indigo-500
                     "/>
 
-                {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm mt-1">
-                        {errors.confirmPassword[0]}
-                    </p>
-                )}
+                    {errors.confirmPassword && (
+                        <p className="text-red-500 text-sm mt-1">
+                            {errors.confirmPassword[0]}
+                        </p>
+                    )}
 
-            </div>
+                </div>
 
-            
 
-            <button
-                type="submit"
-                disabled={registerMutation.isPending}
-                className="
+
+                <button
+                    type="submit"
+                    disabled={registerMutation.isPending}
+                    className="
                 w-full
                 py-3
                 rounded-xl
@@ -287,26 +287,26 @@ const Register = () => {
                 font-semibold
                 text-white
                 disabled:opacity-50" >
-                {registerMutation.isPending ? "Creating Account..." : "Create Account"}
-            </button>
+                    {registerMutation.isPending ? "Creating Account..." : "Create Account"}
+                </button>
 
 
-            <p className="text-center text-zinc-400 mt-6">
+                <p className="text-center text-zinc-400 mt-6">
 
-                Already have an account?
+                    Already have an account?
 
-                <span
-                    onClick={() => navigate("/login")}
-                    className="ml-2 text-indigo-400 hover:text-indigo-300 cursor-pointer font-medium">
-                    Login
-                </span>
+                    <span
+                        onClick={() => navigate("/login")}
+                        className="ml-2 text-indigo-400 hover:text-indigo-300 cursor-pointer font-medium">
+                        Login
+                    </span>
 
-            </p>
+                </p>
 
-        </form>
+            </form>
 
-    </div>
-);
+        </div>
+    );
 };
 
 export default Register;

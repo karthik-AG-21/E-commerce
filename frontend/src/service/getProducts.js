@@ -1,16 +1,13 @@
 import axios from "axios";
+import api from "../api/api.js"
 
 async function getProducts(category) {
-    let url = "http://localhost:3000/products";
 
-    if (category && category !== "all") {
-        url += `?category=${category}`
-    }
+    console.log(category, )
 
-    const res = await axios.get(url);
-        
+   const res = await api.get("/?", {params:category && category !== "all" ? {category} : {}})
 
-    return res.data;
+    return res.data.data;
 }
 
 export default getProducts;

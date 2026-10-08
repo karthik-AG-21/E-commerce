@@ -4,7 +4,7 @@ import getProductsById from "../service/getProductsById";
 
 
 function useProductById(id){
-    console.log("called the id ")
+    console.log("called the id ", id)
     return useQuery({
         queryKey:["product",id],
         queryFn:()=>getProductsById(id),

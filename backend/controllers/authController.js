@@ -21,8 +21,26 @@ export const register = async(req,res)=>{
 
         const user = await User.create({name:name, email:email, password:hashedPassword});
 
+        const token = jwt.sign({id:user?._id , role:user?.role}, process.env.JWT_SECRET, {expiresIn:"15m"});
 
-        res.status(201).json({success:true, data:{id:user.id, name:user.name, email:user.email}, message:"register successfull"})
+        const refreshToken = jwt.sign({id:user._id, role:user?.role}, process.env.REFRESH_TOKEN_SECRET, {expiresIn:"7d"});
+
+        res.cookie("accessToken", token, {
+            httpOnly:true,
+            secure:process.env.NODE_ENV === "production",
+            sameSite:"lax",
+            maxAge:15*60*1000
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly:true,
+            secure:process.env.NODE_ENV === "production",
+            sameSite:"lax",
+            maxAge:7*24*60*60*1000
+        })
+
+
+        res.status(201).json({success:true, data:{id:user._id, name:user.name, email:user.email}, message:"register successfull"})
 
     }catch(error){
         console.log(error);
@@ -46,19 +64,35 @@ export const login = async(req,res)=>{
             return res.status(404).json({success:false, message:"User is not found"});
         };
 
+        if(user.isBlocked){
+            return res.status(403).json({success:false , message:"User is blocked"})
+        }
+
         const correctPassword = await  bcrypt.compare(password , user.password)
 
         if(!correctPassword){
             return res.status(401).json({success:false, message:"incorrect password"})
         }
 
-        const token = jwt.sign({id:user.id,}, process.env.JWT_SECRET, {expiresIn:"15m"});
+        const token = jwt.sign({id:user._id, role:user?.role}, process.env.JWT_SECRET, {expiresIn:"15m"});
+        
+        const refreshToken = jwt.sign({id:user._id, role:user?.role}, process.env.REFRESH_TOKEN_SECRET, {expiresIn:"7d"});
 
-        if(!token){
-            return res.status(401).json({success:false, message:"failed to generate token"});
-        }
+        res.cookie("accessToken", token, {
+            httpOnly:true,
+            secure:process.env.NODE_ENV === "production",
+            sameSite:"lax",
+            maxAge:15*60*1000
+        });
 
-        res.status(200).json({success:true, data:{id:user.id,name:user.name , email:user.email, }, accessToken:token,  message:"login successfull"});
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly:true,
+            secure:process.env.NODE_ENV === "production",
+            sameSite:"lax",
+            maxAge:7*24*60*60*1000
+        })
+
+        res.status(200).json({success:true, data:{id:user._id,name:user.name , email:user.email, }, message:"login successfull"});
 
     }catch(error){
         console.log(error);

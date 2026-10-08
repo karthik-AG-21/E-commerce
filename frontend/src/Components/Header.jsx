@@ -42,22 +42,8 @@ function Header() {
 
 }, [cartData, wishlistData, dispatch]);
 
-    if (WishlistLoading) {
-        return <h1>loading</h1>
-    }
-
-    if (wishlistError) {
-        return <h1>error</h1>
-    }
-
-
-     if (cartLoading) {
-        return <h1>loading</h1>
-    }
-
-    if (cartError) {
-        return <h1>error</h1>
-    }
+    
+    
 
     // console.log(data, "the cart data")
 

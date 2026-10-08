@@ -19,7 +19,7 @@ function ProductCards({ product }) {
 
         <div
 
-            onClick={() => navigate(`/products/${product.category}/${product.id}`)}
+            onClick={() => navigate(`/products/${product.category}/${product?._id}`)}
 
             className="relative w-[270px] rounded-2xl bg-[#191A20] border
             border-white/10 hover:border-indigo-500/40 hover:-translate-y-1 

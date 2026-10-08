@@ -24,23 +24,27 @@ function Login() {
         try {
 
             
-            const user = await loginRequest(formData);
+            const data = await loginRequest(formData);
 
-            const userDetails = { name:user.name , email:user.email, role:user.role, id:user.id }
+            const user = data.data
 
-            localStorage.setItem("userId", user.id);
+            console.log(user)
+
+            const userDetails = { name:user?.name , email:user?.email, role:user?.role, id:user?.id }
+
+            localStorage.setItem("userId", user?.id);
 
             localStorage.setItem("user", JSON.stringify(userDetails) )
 
 
             
 
-            if (user.role == "admin") {
-                toast.success(`Welcome ${user.name}!`);
+            if (user?.role == "admin") {
+                toast.success(`Welcome ${user?.name}!`);
                 navigate("/Dashboard")
             } else {
-                if(!user.isBlocked){
-                    toast.success(`Welcome ${user.name}!`);
+                if(!user?.isBlocked){
+                    toast.success(`Welcome ${user?.name}!`);
                     navigate("/");
                 }else{
                     toast.error(`Your Blocked`);

@@ -5,7 +5,7 @@ import getProducts from "../service/getProducts";
 
 
 function useProducts(category){
-    console.log("called the category")
+    console.log("called the category" ,category)
     return useQuery({
         queryKey:["products",category],
         queryFn:()=>getProducts(category),

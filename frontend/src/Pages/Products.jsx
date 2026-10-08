@@ -99,7 +99,7 @@ function Products() {
     if (error) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#0B0B0F] text-red-500">
-                Something went wrong.
+                Something went wrong here.
             </div>
         );
     }
