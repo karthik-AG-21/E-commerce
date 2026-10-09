@@ -1,37 +1,51 @@
-
 import { createSlice } from "@reduxjs/toolkit";
-import Wishlist from "../Pages/Wishlist";
-
 
 const initialState = {
     items: [],
-}
-
+};
 
 const wishlistSlice = createSlice({
     name: "wishlist",
     initialState,
     reducers: {
-
-        setWishlist(state, action) {
-            state.items = action.payload;
+        setWishlist: (state, action) => {
+            state.items = action.payload ?? [];
         },
-        addToWishlist(state, action) {
 
-            const existingItem = state.items.find((item) => item.id === action.payload.id)
 
-            if (!existingItem) {
-                state.items.push(action.payload)
+        addToWishlist: (state, action) => {
+            const product = action.payload?.product ?? action.payload;
+
+            if (!product?._id) return;
+
+            const exists = state.items.some((item) => {
+                const currentProduct = item.product ?? item;
+                return String(currentProduct._id) === String(product._id);
+            });
+
+            if (!exists) {
+                // Keep the same structure as the backend wishlist response.
+                state.items.push({ product });
             }
-
-
         },
-        removeFromWishlist(state, action) {
-            state.items = state.items.filter( (item) => item.id !== action.payload.id );
+
+        removeFromWishlist: (state, action) => {
+            const productId =
+                action.payload?.product?._id ?? action.payload?._id;
+
+            if (!productId) return;
+
+            state.items = state.items.filter((item) => {
+                const currentProduct = item.product ?? item;
+
+                return String(currentProduct._id) !== String(productId);
+            });
         },
     },
 
 
-})
-export const { setWishlist , addToWishlist, removeFromWishlist } = wishlistSlice.actions
-export default wishlistSlice.reducer
+});
+
+export const {setWishlist,addToWishlist, removeFromWishlist } = wishlistSlice.actions;
+
+export default wishlistSlice.reducer;

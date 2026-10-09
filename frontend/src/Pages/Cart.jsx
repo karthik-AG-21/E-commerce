@@ -77,7 +77,7 @@ function Cart() {
                         return (
                             <div key={item.id} className=" bg-[#191A20] text-white rounded-lg p-5 flex flex-col md:flex-row items-center gap-6 shadow-md" >
 
-                                <img src={item.images[0] || item.images[1] || item.images[2]} alt={item.title} className="w-32 h-32 object-cover rounded" />
+                                <img src={item.product.images[0] || item.images[1] || item.images[2]} alt={item.title} className="w-32 h-32 object-cover rounded" />
 
                                 <div className="flex-1 flex flex-col gap-3">
 

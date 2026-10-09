@@ -48,24 +48,23 @@ function Wishlist() {
 
 };
 
-    const handleRemoveWishlist = (item) => {
+console.log(products , products.length,"wihslist.js")
 
-
-        const updatedWishlist = products.filter(
-            (product) => product.id !== item.id
-        );
+   const handleRemoveWishlist = async (item) => {
+    try {
+        await wishlists.mutateAsync({
+            type: "remove",
+            productId: item.product._id,
+        });
 
         dispatch(removeFromWishlist(item));
-
-
-        wishlists.mutate({
-        userId : user,
-        wishlist: updatedWishlist,
-    });
-
-
-
-    };
+    } catch (error) {
+        console.error(
+            "Failed to remove wishlist item:",
+            error.response?.data || error.message
+        );
+    }
+};
 
     return (
         <div className="min-h-screen bg-[#0B0B0F] pt-24 px-5">
@@ -87,30 +86,30 @@ function Wishlist() {
 
                     {products.map((item) => (
 
-                        <div key={item.id} className=" bg-[#191A20] text-white rounded-xl shadow-lg p-5 flex flex-col md:flex-row items-center gap-6">
+                        <div key={item.product._id} className=" bg-[#191A20] text-white rounded-xl shadow-lg p-5 flex flex-col md:flex-row items-center gap-6">
 
                             <img className="w-32 h-32 object-cover rounded-lg"
-                                src={item.images[0] || item.images[1] || item.images[2]} alt={item.title} />
+                                src={item.product?.images[0] || item.product?.images[1] || item.product?.images[2]} alt={item.product?.title} />
 
                             <div className="flex-1 flex flex-col gap-2">
 
                                 <h2 className="font-bold text-xl">
-                                    {item.title}
+                                    {item.product.title}
                                 </h2>
 
                                 <p className="text-green-600 font-bold text-lg">
-                                    ${item.price}
+                                    ${item.product.price}
                                 </p>
 
                                 <p className="text-gray-600">
-                                    Stock: {item.stock}
+                                    Stock: {item.product.stock}
                                 </p>
 
                             </div>
 
                             <div className="flex flex-col gap-3">
 
-                                <button onClick={() => handleAddToCart(item)}
+                                <button onClick={() => handleAddToCart(item.product)}
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2
                                      rounded-lg font-bold transition"> Add to Cart</button>
 

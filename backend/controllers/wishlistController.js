@@ -23,37 +23,47 @@ export const getWishlist = async (req, res) => {
     }
 }
 
-export const createWishlist = async (req, res) => {
+export const addToWishlist = async (req, res) => {
     try {
 
         const id = req.user.id;
 
-        const { productId, quantity } = req.body;
+        const { productId  } = req.body;
 
-        if (!id) {
-            return res.status(401).json({ success: false, message: "ID is required" });
-        };
-
-        if (!productId || !quantity) {
+        if (!productId) {
             return res.status(400).json({ success: false, message: "provide the wishlist Data" });
         };
 
-        const wishlist = await Wishlist.create({
+        let wishlist = await Wishlist.findOne({user:id});
+
+        if(!wishlist){
+            wishlist = await Wishlist.create({
             user: id,
             items: [{
-                product: productId,
-                quantity: quantity
+                product: productId
             }]
         });
 
-        if (!wishlist) {
-            return res.status(200).json({ success: true, data: { user: id, items: [] }, message: "wishlist is empty" });
+        return res.status(200).json({ success: true, data: wishlist, message: "wishlist added successfully" });
+
         }
 
 
-        res.status(200).json({ success: true, data: wishlist, message: "wishlist added successfully" });
+        const exists = wishlist.items.some(item=>item.product.toString() === productId)
 
 
+        if (exists) {
+            return res.status(409).json({
+                success: false,
+                message: "Product already exists in wishlist"
+            });
+        }
+
+         wishlist.items.push({product: productId});
+
+        await wishlist.save();
+
+        return res.status(200).json({success:true,    data:wishlist,  message:"Product added to wishlist"});
 
     } catch (error) {
         console.log(error);
@@ -61,3 +71,48 @@ export const createWishlist = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
+
+
+export const removeFromWishlist = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const userId = req.user.id;
+
+        if (!productId) {
+            return res.status(400).json({
+                success: false,
+                message: "Product ID is required",
+            });
+        }
+
+        const wishlist = await Wishlist.findOneAndUpdate(
+            { user: userId },
+            {
+                $pull: {
+                    items: { product: productId },
+                },
+            },
+            { new: true }
+        );
+
+        if (!wishlist) {
+            return res.status(404).json({
+                success: false,
+                message: "Wishlist not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: wishlist,
+            message: "Product removed from wishlist successfully",
+        });
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+};

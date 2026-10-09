@@ -1,64 +1,62 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useUpdateWishlist from "../Wishlist/useUpdateWishlist";
-import { addToWishlist, removeFromWishlist } from "../../redux/wishlistSlice";
+import {
+    addToWishlist,
+    removeFromWishlist,
+} from "../../redux/wishlistSlice";
 
-
- function useAddToWishlist(product) {
-
+function useAddToWishlist(product) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const wishlist = useSelector((state) => state.wishlist?.items);
+    const wishlist = useSelector(
+        (state) => state.wishlist.items
+    );
 
-
-    const { mutate } = useUpdateWishlist();
-
+    const { mutateAsync , isPending } = useUpdateWishlist();
 
     const userId = localStorage.getItem("userId");
 
+    const isWishlisted = wishlist.some(
+        (item) => String(item.product?._id) === String(product._id)
+    );
 
-    const isWishlisted = wishlist.some((item) => item.id === product.id);
-
-
-    const toggleWishlist = (product) => {
-
-
+    const toggleWishlist = async () => {
         if (!userId) {
             navigate("/login");
             return;
         }
 
+        try {
+            if (isWishlisted) {
+                await mutateAsync({
+                    type: "remove",
+                    productId: product._id,
+                });
 
-        let updatedWishlist;
+                dispatch(removeFromWishlist(product));
+            } else {
+                await mutateAsync({
+                    type: "add",
+                    productId: product._id,
+                });
 
-
-        if (isWishlisted) {
-
-            updatedWishlist = wishlist.filter((item) => item.id !== product.id);
-
-
-            dispatch(removeFromWishlist(product))
-
-
-        } else {
-
-            updatedWishlist = [ ...wishlist,  product ];
-
-
-            dispatch(addToWishlist(product));
-
+                dispatch(addToWishlist(product));
+            }
+        } catch (error) {
+            console.error(
+                "Failed to update wishlist:",
+                error.response?.data || error.message
+            );
         }
-
-
-
-        mutate({ userId, wishlist:updatedWishlist });
-
     };
 
-
-    return { toggleWishlist, isWishlisted};
-
+    return {
+        toggleWishlist,
+        isWishlisted,
+        isPending
+    };
 }
 
 export default useAddToWishlist;
