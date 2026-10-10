@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import useGetWishlist from "../hooks/useGetWishlist";
 import Header from "../Components/Header";
 import useUpdateWishlist from "../hooks/Wishlist/useUpdateWishlist";
+import { toast } from "react-toastify";
 
 function Wishlist() {
     const dispatch = useDispatch();
@@ -27,44 +28,68 @@ function Wishlist() {
     }, [wishlist, dispatch]);
 
 
-   const handleAddToCart = (item) => {
+    const handleAddToCart = async (product) => {
+        if (!product?._id) {
+            toast.error("Invalid product");
+            return;
+        }
 
-    const updatedCart = [...cart, {...item,quantity :1}];
+        try {
+            // Add the product to MongoDB through the backend.
+            await carts.mutateAsync({
+                type: "add",
+                productId: product._id,
+                quantity: 1,
+            });
 
-    const updatedWishlist = products.filter((product) => product.id !== item.id);
+            // Update Redux after the backend succeeds.
+            dispatch(
+                addToCart({
+                    product,
+                    quantity: 1,
+                })
+            );
 
-    dispatch(addToCart(item));
-    dispatch(removeFromWishlist(item));
+            // Remove the product from MongoDB wishlist.
+            await wishlists.mutateAsync({
+                type: "remove",
+                productId: product._id,
+            });
 
-    carts.mutate({
-        userId: user,
-        cart: updatedCart,
-    });
+            // Update the frontend wishlist.
+            dispatch(removeFromWishlist({ product }));
 
-    wishlists.mutate({
-        userId: user,
-        wishlist: updatedWishlist,
-    });
+            toast.success("Product added to cart");
+        } catch (error) {
+            console.error(
+                "Failed to move product to cart:",
+                error.response?.data ?? error.message
+            );
 
-};
+            toast.error(
+                error.response?.data?.message ??
+                "Failed to move product to cart"
+            );
+        }
+    };
 
-console.log(products , products.length,"wihslist.js")
+    console.log(products, products.length, "wihslist.js")
 
-   const handleRemoveWishlist = async (item) => {
-    try {
-        await wishlists.mutateAsync({
-            type: "remove",
-            productId: item.product._id,
-        });
+    const handleRemoveWishlist = async (item) => {
+        try {
+            await wishlists.mutateAsync({
+                type: "remove",
+                productId: item.product._id,
+            });
 
-        dispatch(removeFromWishlist(item));
-    } catch (error) {
-        console.error(
-            "Failed to remove wishlist item:",
-            error.response?.data || error.message
-        );
-    }
-};
+            dispatch(removeFromWishlist(item));
+        } catch (error) {
+            console.error(
+                "Failed to remove wishlist item:",
+                error.response?.data || error.message
+            );
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#0B0B0F] pt-24 px-5">
