@@ -102,14 +102,9 @@ export const removeCart = async (req, res) => {
         }
 
         const cart = await Cart.findOneAndUpdate(
-            { user: userId },
-            {
-                $pull: {
-                    items: { product: productId }
-                }
-            },
-
-            { new: true });
+            { user: id },
+            { $pull: { items: { product: productId } } },
+            { returnDocument: "after" }).populate("items.product");
 
         if (!cart) {
             return res.status(404).json({ success: false, message: "Cart not found" });
@@ -123,3 +118,59 @@ export const removeCart = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
+export const updateCartQuantity = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { productId } = req.params;
+        const { quantity } = req.body;
+
+        if (!Number.isInteger(quantity) || quantity < 1) {
+            return res.status(400).json({
+                success: false,
+                message: "Quantity must be a positive integer",
+            });
+        }
+
+        const cart = await Cart.findOne({ user: userId });
+
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found",
+            });
+        }
+
+        const item = cart.items.find(
+            (item) => item.product.toString() === productId
+        );
+
+        if (!item) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found in cart",
+            });
+        }
+
+        item.quantity = quantity;
+
+        await cart.save();
+
+        const updatedCart = await Cart.findById(cart._id)
+            .populate("items.product");
+
+        return res.status(200).json({
+            success: true,
+            data: updatedCart,
+            message: "Cart quantity updated successfully",
+        });
+    } catch (error) {
+        console.error("Update cart quantity error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+
+
+};
