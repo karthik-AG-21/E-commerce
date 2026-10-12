@@ -1,11 +1,8 @@
-// services/orderService.js
+import api from "../api/api.js";
 
-import axios from "axios";
-
-
-export async function getOrders(userId) {
-
-    const { data } = await axios.get(`http://localhost:3000/users/${userId}`);
-
-    return data.orders;
+export async function getOrders() {
+    const { data } = await api.get("/orders/my-orders");
+    return data.data;
 }
+
+export default getOrders;

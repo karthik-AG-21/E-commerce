@@ -8,6 +8,8 @@ import cookieParser from 'cookie-parser';
 import cors from "cors";
 import cartRouter from './routers/cartRouter.js';
 import wishlistRouter from './routers/wishlistRouter.js';
+import orderRouter from './routers/orderRouter.js';
+
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ app.use(morgan("dev"));
 await connectDB();
 
 
+
 app.use("/products", router);
 
 app.use("/",authRouter);
@@ -30,6 +33,8 @@ app.use("/",authRouter);
 app.use("/cart", cartRouter);
 
 app.use("/wishlist", wishlistRouter);
+
+app.use("/orders", orderRouter);
 
 
 app.get("/",(req,res)=>{

@@ -2,157 +2,147 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../Components/Header";
 
 function OrderSuccess() {
+const navigate = useNavigate();
+const location = useLocation();
+const order = location.state?.order;
 
-    const navigate = useNavigate();
-    const location = useLocation();
+const totalAmount = Number(
+    order?.totalAmount ?? order?.totalPrice ?? 0
+);
 
-    console.log(location)
-    const order = location.state?.order;
+return (
+    <div className="h-screen overflow-hidden bg-[#0B0B0F] text-white flex flex-col">
+        <Header />
 
-
-    return (
-        <div className="min-h-screen bg-[#0B0B0F] text-white pt-24">
-
-            <Header />
-
-            <div className="max-w-3xl mx-auto px-5">
-
-                <div className="bg-[#191A20] border border-white/10 rounded-2xl p-8 text-center">
-
-
-                    <div className="text-6xl mb-5">
+        <main className="flex-1 min-h-0 flex items-center justify-center px-4 py-3">
+            <div className="w-full max-w-3xl max-h-full overflow-y-auto">
+                <div className="bg-[#191A20] border border-white/10 rounded-2xl p-5 md:p-7 text-center">
+                    <div className="text-4xl mb-2">
                         ✅
                     </div>
 
-
-                    <h1 className="text-4xl font-bold mb-3">
+                    <h1 className="text-2xl md:text-3xl font-bold mb-2">
                         Order Placed Successfully!
                     </h1>
 
-
-                    <p className="text-zinc-400 mb-8">
+                    <p className="text-sm text-zinc-400 mb-5">
                         Thank you for shopping with TechStore.
                     </p>
 
+                    {order ? (
+                        <div className="text-left bg-[#23242C] rounded-xl p-4 space-y-4">
+                            <h2 className="text-lg font-semibold">
+                                Order Details
+                            </h2>
 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-b border-white/10 pb-3 text-sm">
+                                <p className="break-all">
+                                    Order ID:{" "}
+                                    <span className="text-indigo-400">
+                                        {order._id ?? order.id ?? "N/A"}
+                                    </span>
+                                </p>
 
-                    {
-                        order && (
+                                <p>
+                                    Payment:{" "}
+                                    <span className="text-indigo-400">
+                                        {order.paymentMethod}
+                                    </span>
+                                </p>
 
-                            <div className="text-left bg-[#23242C] rounded-xl p-5 space-y-4">
+                                <p>
+                                    Status:{" "}
+                                    <span className="text-indigo-400 capitalize">
+                                        {order.status ?? "pending"}
+                                    </span>
+                                </p>
 
+                                <p>
+                                    Total:{" "}
+                                    <span className="text-green-400 font-semibold">
+                                        ₹{totalAmount.toFixed(2)}
+                                    </span>
+                                </p>
+                            </div>
 
-                                <h2 className="text-xl font-semibold">
-                                    Order Details
-                                </h2>
-
-
-                                <div className="border-b border-white/10 pb-3">
-
-                                    <p>
-                                        Payment Method:
-                                        <span className="text-indigo-400 ml-2">
-                                            {order.paymentMethod}
-                                        </span>
-                                    </p>
-
-
-                                    <p>
-                                        Total Amount:
-                                        <span className="text-green-400 ml-2 font-semibold">
-                                            ₹ {order.totalPrice}
-                                        </span>
-                                    </p>
-
-                                </div>
-
-
-
-                                <div>
-
-                                    <h3 className="font-semibold mb-2">
+                            {order.address && (
+                                <div className="text-sm">
+                                    <h3 className="font-semibold mb-1">
                                         Delivery Address
                                     </h3>
 
-
                                     <p className="text-zinc-300">
                                         {order.address.name}
+                                        {" · "}
+                                        {order.address.phone}
                                     </p>
 
                                     <p className="text-zinc-400">
-                                        {order.address.street}, {order.address.city}
+                                        {order.address.street},{" "}
+                                        {order.address.city},{" "}
+                                        {order.address.state} -{" "}
+                                        {order.address.zipCode}
                                     </p>
-
-                                    <p className="text-zinc-400">
-                                        {order.address.state} - {order.address.zipCode}
-                                    </p>
-
                                 </div>
+                            )}
 
+                            <div className="text-sm">
+                                <h3 className="font-semibold mb-2">
+                                    Items
+                                </h3>
 
+                                <div className="space-y-2">
+                                    {(order.items ?? []).map((item, index) => {
+                                        const product =
+                                            item.product ?? item;
 
-                                <div>
+                                        const quantity =
+                                            Number(item.quantity) || 0;
 
-                                    <h3 className="font-semibold mb-2">
-                                        Items
-                                    </h3>
+                                        const price =
+                                            Number(item.price ?? product.price) || 0;
 
-
-                                    {
-                                        order.items.map((item) => (
-
+                                        return (
                                             <div
-                                                key={item.id}
-                                                className="flex justify-between text-zinc-300"
+                                                key={item._id ?? product._id ?? index}
+                                                className="flex justify-between gap-3 text-zinc-300"
                                             >
-
-                                                <span>
-                                                    {item.title} × {item.quantity}
+                                                <span className="min-w-0 break-words">
+                                                    {product.title ?? "Product"}{" "}
+                                                    × {quantity}
                                                 </span>
 
-                                                <span>
-                                                    ₹ {item.price * item.quantity}
+                                                <span className="shrink-0">
+                                                    ₹{(
+                                                        price * quantity
+                                                    ).toFixed(2)}
                                                 </span>
-
                                             </div>
-
-                                        ))
-                                    }
-
+                                        );
+                                    })}
                                 </div>
-
-
                             </div>
-
-                        )
-                    }
-
-
+                        </div>
+                    ) : (
+                        <p className="text-zinc-400 text-sm">
+                            Order details are unavailable on this page.
+                            Please check your order history.
+                        </p>
+                    )}
 
                     <button
                         onClick={() => navigate("/")}
-                        className="
-                        mt-8
-                        w-full
-                        bg-indigo-600
-                        hover:bg-indigo-700
-                        py-3
-                        rounded-xl
-                        font-semibold
-                        transition
-                        "
+                        className="mt-5 w-full bg-indigo-600 hover:bg-indigo-700 py-2.5 rounded-xl font-semibold transition"
                     >
                         Continue Shopping
                     </button>
-
-
-
                 </div>
-
             </div>
+        </main>
+    </div>
+);
 
-        </div>
-    );
+
 }
 
 export default OrderSuccess;

@@ -92,7 +92,7 @@ export const login = async(req,res)=>{
             maxAge:7*24*60*60*1000
         })
 
-        res.status(200).json({success:true, data:{id:user._id,name:user.name , email:user.email, }, message:"login successfull"});
+        res.status(200).json({success:true, data:{id:user._id,name:user.name , role:user.role , email:user.email, }, message:"login successfull"});
 
     }catch(error){
         console.log(error);

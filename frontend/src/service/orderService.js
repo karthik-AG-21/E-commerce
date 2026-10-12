@@ -1,27 +1,10 @@
-import axios from "axios";
+import api from "../api/api.js";
 
-export async function placeOrder({userId, cartItems, totalPrice, paymentMethod,address }) {
-
-    const { data: user } = await axios.get(`http://localhost:3000/users/${userId}`);
-
-    const order = {
-        id: crypto.randomUUID(),
-        items: cartItems,
-        totalPrice,
-        paymentMethod,
-        address,
-        status: "Pending",
-        orderedAt: new Date().toISOString(),
-    };
-
-    const updatedUser = {
-        ...user,
-        orders: [...user.orders, order],
-    };
-
-    const { data } = await axios.put(`http://localhost:3000/users/${userId}`,updatedUser);
+async function placeOrder({ address, paymentMethod }) {
+    const { data } = await api.post("/orders/create", {address , paymentMethod });
 
     return data;
+
 }
 
 export default placeOrder;

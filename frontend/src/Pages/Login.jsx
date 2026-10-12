@@ -28,6 +28,8 @@ function Login() {
 
             const user = data.data
 
+            console.log(user,"hhh")
+
             console.log(user)
 
             const userDetails = { name:user?.name , email:user?.email, role:user?.role, id:user?.id }
@@ -37,7 +39,7 @@ function Login() {
             localStorage.setItem("user", JSON.stringify(userDetails) )
 
 
-            
+            console.log(user.role,"hhhehehe")
 
             if (user?.role == "admin") {
                 toast.success(`Welcome ${user?.name}!`);
