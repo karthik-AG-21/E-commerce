@@ -9,6 +9,6 @@ authRouter.post("/register", register);
 
 authRouter.post("/login", login);
 
-authRouter.post("/auth/refresh", refreshAccessToken);
+authRouter.post("/refresh", refreshAccessToken);
 
 export default authRouter

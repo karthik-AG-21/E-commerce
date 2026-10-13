@@ -11,7 +11,7 @@ function ProductCard({ product }) {
         <div key={product.id} className="relative py-4 flex flex-col shrink-0 w-[250px] h-[450px]
             rounded-xl bg-[#191A20] border border-white/10
             transition-all duration-300 hover:-translate-y-1
-            hover:border-indigo-500/40 hover:shadow-xl" onClick={()=>naviagte(`/products/${product.category}/${product.id}`)}>
+            hover:border-indigo-500/40 hover:shadow-xl" onClick={()=>naviagte(`/products/${product.category}/${product?._id}`)}>
            
 
             <div className="absolute top-8 left-3 bg-indigo-600 text-white px-3 py-1 rounded-lg">

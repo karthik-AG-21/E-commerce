@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { connectDB } from './config/db.js';
 import router from './routers/productRouter.js';
 import morgan from "morgan";
+import helmet from "helmet"
+import rateLimit from "express-rate-limit";
 import authRouter from './routers/authRouter.js';
 import cookieParser from 'cookie-parser';
 import cors from "cors";
@@ -15,12 +17,44 @@ dotenv.config();
 
 const app = express();
 
+app.use(helmet())
 
-app.use(cors({origin:"http://localhost:5173", credentials:true}))
+
+app.use(cors({ origin: "http://localhost:5173", credentials: true }))
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(morgan("dev"));
+
+if (process.env.NODE_ENV !== "production") {
+    app.use(morgan("dev"));
+}
+
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: "Too Many request ,  Please request later."
+    },
+})
+
+app.use(apiLimiter)
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: "Too Many authentication request , Please try again later"
+    }
+})
+
+
 
 await connectDB();
 
@@ -28,7 +62,7 @@ await connectDB();
 
 app.use("/products", router);
 
-app.use("/",authRouter);
+app.use("/auth", authLimiter , authRouter);
 
 app.use("/cart", cartRouter);
 
@@ -37,10 +71,10 @@ app.use("/wishlist", wishlistRouter);
 app.use("/orders", orderRouter);
 
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
     res.send("hello world")
 });
 
-app.listen(8000, ()=>{
+app.listen(8000, () => {
     console.log("server is running in http://localhost:8000");
 })

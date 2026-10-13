@@ -28,40 +28,27 @@ export const createCart = async (req, res) => {
         const { productId, quantity = 1 } = req.body;
 
         if (!productId) {
-            return res.status(400).json({
-                success: false,
-                message: "Product ID is required"
+            return res.status(400).json({ success: false, message: "Product ID is required"
             });
         }
 
         if (!Number.isInteger(quantity) || quantity < 1) {
-            return res.status(400).json({
-                success: false,
-                message: "Quantity must be a positive integer"
-            });
+            return res.status(400).json({success: false,  message: "Quantity must be a positive integer"});
         }
 
-        // Find the user's existing cart
+       
         let cart = await Cart.findOne({ user: id });
 
         // Create a cart only if one doesn't exist
         if (!cart) {
-            cart = await Cart.create({
-                user: id,
-                items: [{ product: productId, quantity }]
-            });
+            cart = await Cart.create({user: id, items: [{ product: productId, quantity }] });
 
-            return res.status(201).json({
-                success: true,
-                data: cart,
-                message: "Cart created successfully"
+            return res.status(201).json({success: true, data: cart, message: "Cart created successfully"
             });
         }
 
         // Check whether the product already exists
-        const existingItem = cart.items.find(
-            (item) => item.product.toString() === productId
-        );
+        const existingItem = cart.items.find((item) => item.product.toString() === productId);
 
         if (existingItem) {
             existingItem.quantity += quantity;
@@ -71,18 +58,13 @@ export const createCart = async (req, res) => {
 
         await cart.save();
 
-        return res.status(200).json({
-            success: true,
-            data: cart,
-            message: "Product added to cart successfully"
-        });
+        return res.status(200).json({ success: true, data: cart, message: "Product added to cart successfully" });
 
     } catch (error) {
         console.error("Cart error:", error);
 
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error"
+        return res.status(500).json({ success: false, message: "Internal server error"
+
         });
     }
 
@@ -101,10 +83,8 @@ export const removeCart = async (req, res) => {
             return res.status(400).json({ success: false, message: "Bad request must provide product id" });
         }
 
-        const cart = await Cart.findOneAndUpdate(
-            { user: id },
-            { $pull: { items: { product: productId } } },
-            { returnDocument: "after" }).populate("items.product");
+        const cart = await Cart.findOneAndUpdate({ user: id },{ $pull: { items: { product: productId } } },
+             { returnDocument: "after" }).populate("items.product");
 
         if (!cart) {
             return res.status(404).json({ success: false, message: "Cart not found" });
@@ -125,19 +105,13 @@ export const updateCartQuantity = async (req, res) => {
         const { quantity } = req.body;
 
         if (!Number.isInteger(quantity) || quantity < 1) {
-            return res.status(400).json({
-                success: false,
-                message: "Quantity must be a positive integer",
-            });
+            return res.status(400).json({success: false, message: "Quantity must be a positive integer", });
         }
 
         const cart = await Cart.findOne({ user: userId });
 
         if (!cart) {
-            return res.status(404).json({
-                success: false,
-                message: "Cart not found",
-            });
+            return res.status(404).json({success: false, message: "Cart not found", });
         }
 
         const item = cart.items.find(
@@ -145,10 +119,7 @@ export const updateCartQuantity = async (req, res) => {
         );
 
         if (!item) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found in cart",
-            });
+            return res.status(404).json({ success: false, message: "Product not found in cart", });
         }
 
         item.quantity = quantity;
@@ -158,18 +129,14 @@ export const updateCartQuantity = async (req, res) => {
         const updatedCart = await Cart.findById(cart._id)
             .populate("items.product");
 
-        return res.status(200).json({
-            success: true,
-            data: updatedCart,
-            message: "Cart quantity updated successfully",
-        });
+        return res.status(200).json({ success: true, data: updatedCart, message: "Cart quantity updated successfully",});
+
     } catch (error) {
+
         console.error("Update cart quantity error:", error);
 
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-        });
+        return res.status(500).json({ success: false, message: "Internal server error",});
+        
     }
 
 
