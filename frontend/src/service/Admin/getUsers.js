@@ -1,11 +1,12 @@
-import axios from "axios";
+// import axios from "axios";
+// import api from "../../api/api.js";
 
 
-async function getUsers(){
+// async function getUsers(){
 
-    const res =  await axios.get("http://localhost:3000/users")
+//     const res =  await api.get("")
 
-    return res.data
-}
+//     return res.data
+// }
 
-export default getUsers;
+// export default getUsers;

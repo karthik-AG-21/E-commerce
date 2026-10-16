@@ -6,7 +6,7 @@ import { TiShoppingCart } from "react-icons/ti";
 import { RxDashboard } from "react-icons/rx";
 import { MdLogout } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import useGetUsers from "../../hooks/Admin/useGetUsers";
+// import useGetUsers from "../../hooks/Admin/useGetUsers";
 
 function SideBar() {
     

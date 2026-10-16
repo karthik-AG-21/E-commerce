@@ -5,7 +5,7 @@ async function getCart() {
 
   const response = await api.get("/cart/get")
 
-  console.log("h1",response.data.data);
+  console.log("h1",response);
   return response.data.data.items;
   
 }

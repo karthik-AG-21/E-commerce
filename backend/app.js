@@ -11,6 +11,7 @@ import cors from "cors";
 import cartRouter from './routers/cartRouter.js';
 import wishlistRouter from './routers/wishlistRouter.js';
 import orderRouter from './routers/orderRouter.js';
+import adminRouter from './routers/adminRouter.js';
 
 
 dotenv.config();
@@ -69,6 +70,8 @@ app.use("/cart", cartRouter);
 app.use("/wishlist", wishlistRouter);
 
 app.use("/orders", orderRouter);
+
+app.use("/admin", adminRouter);
 
 
 app.get("/", (req, res) => {

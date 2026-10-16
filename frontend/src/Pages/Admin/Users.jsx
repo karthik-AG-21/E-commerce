@@ -1,14 +1,14 @@
 import { CiFilter } from "react-icons/ci";
 import Header from "../../Components/Admin/AdminHeader";
 import SideBar from "../../Components/Admin/AdminSidebar";
-import useGetUsers from "../../hooks/Admin/useGetUsers";
+// import useGetUsers from "../../hooks/Admin/useGetUsers";
 import { useState } from "react";
 import useUpdateUserStatus from "../../hooks/Admin/useUpdateUserStatus";
 
 
 function AdminUsers() {
 
-    const { data, isLoading, error } = useGetUsers();
+    // const { data, isLoading, error } = useGetUsers();
     const [search, setSearch] = useState("")
 
     const updateUserStatus = useUpdateUserStatus();

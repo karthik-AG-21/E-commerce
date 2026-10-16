@@ -4,23 +4,24 @@ import SideBar from "../../Components/Admin/AdminSidebar";
 import CategoryChart from "../../Components/Admin/CategoryChart";
 import RevenueChart from "../../Components/Admin/RevenueChart";
 import StatCard from "../../Components/Admin/StatCard";
-import useGetUsers from "../../hooks/Admin/useGetUsers";
-import useMobiles from "../../hooks/useMobiles";
+import useProducts from "../../hooks/useProducts";
+// import useGetUsers from "../../hooks/Admin/useGetUsers";
+// import useMobiles from "../../hooks/useMobiles";
 
 
 
 function Dashboard() {
 
-    const { data : users , isLoading , error } = useGetUsers();
-    const { data : products , isLoading : prodIsLoading , error : prodError } = useMobiles()
+    // const { data : users , isLoading , error } = useGetUsers();
+    const { data : products , isLoading : prodIsLoading , error : prodError } = useProducts()
 
-    if(isLoading){
-        return <h1>loading..</h1>
-    }
+    // if(isLoading){
+    //     return <h1>loading..</h1>
+    // }
 
-    if(error){
-        return <h1>error</h1>
-    }
+    // if(error){
+    //     return <h1>error</h1>
+    // }
 
     if(prodIsLoading){
         return <h1>loading..</h1>

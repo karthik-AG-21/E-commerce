@@ -1,7 +1,7 @@
 import { CiFilter } from "react-icons/ci";
 import Header from "../../Components/Admin/AdminHeader";
 import SideBar from "../../Components/Admin/AdminSidebar";
-import useGetUsers from "../../hooks/Admin/useGetUsers";
+// import useGetUsers from "../../hooks/Admin/useGetUsers";
 import { useState } from "react";
 import useUpdateOrderStatus from "../../hooks/Admin/useUpdateOrderStatus";
 
@@ -9,7 +9,7 @@ import useUpdateOrderStatus from "../../hooks/Admin/useUpdateOrderStatus";
 
 function AdminOrders() {
 
-    const { data, isLoading, error } = useGetUsers()
+    // const { data, isLoading, error } = useGetUsers()
 
     const updateStatus = useUpdateOrderStatus()
 
@@ -17,13 +17,13 @@ function AdminOrders() {
     const [filter , setFilter] = useState("")
     const [currentPage , setCurrentPage] = useState(1)
 
-    if (isLoading) {
-        return <h1>loading ... </h1>
-    }
+    // if (isLoading) {
+    //     return <h1>loading ... </h1>
+    // }
 
-    if (error) {
-        return <h1>error</h1>
-    }
+    // if (error) {
+    //     return <h1>error</h1>
+    // }
 
    
 

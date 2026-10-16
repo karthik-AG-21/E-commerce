@@ -1,12 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import getUsers from "../../service/Admin/getUsers";
+// import { useQuery } from "@tanstack/react-query";
+// import getUsers from "../../service/Admin/getUsers";
 
-function useGetUsers(){
+// function useGetUsers(){
 
-    return useQuery({
-        queryKey:["users"],
-        queryFn:getUsers,
-    })
-}
+//     return useQuery({
+//         queryKey:["users"],
+//         queryFn:getUsers,
+//     })
+// }
 
-export default useGetUsers;
+// export default useGetUsers;

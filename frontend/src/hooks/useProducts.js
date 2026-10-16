@@ -4,12 +4,12 @@ import getProducts from "../service/getProducts";
 
 
 
-function useProducts(category){
-    console.log("called the category" ,category)
+function useProducts(filters = {}) {
     return useQuery({
-        queryKey:["products",category],
-        queryFn:()=>getProducts(category),
-    })
-
+        queryKey: ["products", filters],
+        queryFn: () => getProducts(filters),
+        placeholderData: (previousData) => previousData,
+    });
 }
+
 export default useProducts;

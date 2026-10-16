@@ -3,7 +3,7 @@ import Order from "../models/orderSchema.js";
 import Product from "../models/productSchema.js";
 
 
-// CREATE ORDER
+
 export const createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -11,18 +11,12 @@ export const createOrder = async (req, res) => {
  
        
         if (!["COD", "UPI"].includes(paymentMethod)) {
+
             return res.status(400).json({success: false, message: "Invalid payment method" });
         }
 
         
-        const requiredFields = [
-            "name",
-            "phone",
-            "street",
-            "city",
-            "state",
-            "zipCode",
-        ];
+        const requiredFields = ["name", "phone", "street", "city", "state", "zipCode" ];
 
         if (!address || requiredFields.some((field) =>
 
@@ -38,7 +32,7 @@ export const createOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Your cart is empty", });
         }
 
-        // Validate products and calculate prices on the server
+        
         const orderItems = [];
         let totalAmount = 0;
 
@@ -49,9 +43,7 @@ export const createOrder = async (req, res) => {
                 return res.status(400).json({ success: false, message: "One or more products in your cart no longer exist" });
             }
 
-            if (!Number.isInteger(item.quantity) || item.quantity < 1) {
-                return res.status(400).json({ success: false, message: "Invalid product quantity" });
-            }
+
 
             if (product.stock < item.quantity) {
                 return res.status(400).json({ success: false, message: `Insufficient stock for ${product.title}` });
@@ -62,7 +54,7 @@ export const createOrder = async (req, res) => {
             totalAmount += product.price * item.quantity;
         }
 
-        // Create the order
+
         const order = await Order.create({
             user: userId,
             items: orderItems,
@@ -96,8 +88,9 @@ export const createOrder = async (req, res) => {
 
 };
 
-// GET LOGGED-IN USER'S ORDERS
+
 export const getMyOrders = async (req, res) => {
+
     try {
 
         const userId = req.user.id;
@@ -108,6 +101,7 @@ export const getMyOrders = async (req, res) => {
         return res.status(200).json({success: true, count: orders.length, data: orders });
 
     } catch (error) {
+        
         console.error("Get orders error:", error);
 
         return res.status(500).json({ success: false, message: "Failed to retrieve orders" });
