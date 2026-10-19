@@ -275,7 +275,7 @@ function Products() {
                         <button
                             disabled={!pagination.hasPrevPage}
                             onClick={() => setPage((p) => p - 1)}
-                            className="px-4 py-2 border border-gray-600 rounded disabled:opacity-40">
+                            className="px-4 py-2 border  bg-white text-black border-gray-600 rounded disabled:opacity-40">
                             Previous</button>
 
                         <span>
@@ -286,8 +286,7 @@ function Products() {
                         <button
                             disabled={!pagination.hasNextPage}
                             onClick={() => setPage((p) => p + 1)}
-                            className="px-4 py-2 border border-gray-600 rounded disabled:opacity-40"
-                        >
+                            className="px-4 py-2 border bg-white text-black border-gray-600 rounded disabled:opacity-40">
                             Next
                         </button>
                     </div>

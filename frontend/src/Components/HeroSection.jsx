@@ -32,9 +32,9 @@ function HeroSection() {
             <div
                 className="absolute inset-0 flex flex-col items-center justify-center text-center px-5 z-10  max-w-5xl mx-auto ">
 
-                <span className=" mb-6 px-4 py-2 rounded-xl bg-white/10 border backdrop-blur-md border-white/30 text-white  font-light ">
+                {/* <span className=" mb-6 px-4 py-2 rounded-xl bg-white/10 border backdrop-blur-md border-white/30 text-white  font-light ">
                     NEW ARRIVALS
-                </span>
+                </span> */}
 
                 <h1 className=" text-white font-extrabold text-4xl sm:text-5xl 
                     md:text-6xl lg:text-7xl tracking-tight  drop-shadow-lg animate-fadeIn">Experience <br /> Premium Technology</h1>
@@ -76,9 +76,7 @@ function HeroSection() {
                                 border: "1px solid rgba(255,255,255,0.3)",
                             },
                         }} onClick={() => {
-                            document
-                                .getElementById("category")
-                            ?.scrollIntoView({ behavior: "smooth" });
+                            document.getElementById("category")?.scrollIntoView({ behavior: "smooth" });
                         }} > Explore Categories  </Button>
 
 

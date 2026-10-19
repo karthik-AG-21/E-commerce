@@ -28,7 +28,7 @@ function StatCard({users , allOrders , totalPrice , products }){
                 <div className="mt-5 flex flex-col gap-2 "  onClick={()=>navigate("/Dashboard")}>
 
                     <h1 className="font-medium text-white">Total Revenue</h1>
-                    <h1 className="font-bold text-2xl text-white ">${totalPrice}</h1>
+                    {/* <h1 className="font-bold text-2xl text-white ">${totalPrice}</h1> */}
 
                 </div>
 
@@ -44,7 +44,7 @@ function StatCard({users , allOrders , totalPrice , products }){
                 <div className="mt-5 flex flex-col gap-2"  onClick={()=>navigate("/Dashboard/Admin-orders")}>
 
                     <h1 className="font-medium text-white">Total Orders</h1>
-                    <h1 className="font-bold text-2xl text-white">{allOrders.length || 0}</h1>
+                    {/* <h1 className="font-bold text-2xl text-white">{allOrders.length || 0}</h1> */}
 
                 </div>
 

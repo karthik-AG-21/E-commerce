@@ -2,26 +2,16 @@ import Product from "../models/productSchema.js";
 
 
 // Escape user input before using it in a regular expression
-const escapeRegex = (value) =>
-    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const escapeRegex = (value) =>value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const getProducts = async (req, res) => {
     try {
-        const {
-            search = "",
-            category = "all",
-            brand = "all",
-            sort = "newest",
-            page = "1",
-            limit = "12",
-        } = req.query;
+        const {search = "", category = "all",  brand = "all",sort = "newest", page = "1", limit = "12" } = req.query;
 
         // 1. Validate pagination
         const currentPage = Math.max(1, parseInt(page, 10) || 1);
-        const pageSize = Math.min(
-            50,
-            Math.max(1, parseInt(limit, 10) || 12)
-        );
+        const pageSize = Math.min(50,Math.max(1, parseInt(limit, 10) || 12));
 
         // 2. Build filters
         const filter = {};
@@ -31,10 +21,7 @@ export const getProducts = async (req, res) => {
         }
 
         if (brand !== "all" && brand.trim()) {
-            filter.brand = {
-                $regex: `^${escapeRegex(brand.trim())}$`,
-                $options: "i",
-            };
+            filter.brand = {$regex: `^${escapeRegex(brand.trim())}$`,$options: "i",};
         }
 
         // Search product name, brand, and description
@@ -63,11 +50,7 @@ export const getProducts = async (req, res) => {
 
         // 4. Fetch products and count matching results
         const [products, totalProducts] = await Promise.all([
-            Product.find(filter)
-                .sort(sortBy)
-                .skip((currentPage - 1) * pageSize)
-                .limit(pageSize)
-                .lean(),
+            Product.find(filter).sort(sortBy).skip((currentPage - 1) * pageSize).limit(pageSize).lean(),
 
             Product.countDocuments(filter),
         ]);

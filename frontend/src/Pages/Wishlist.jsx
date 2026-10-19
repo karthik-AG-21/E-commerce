@@ -96,13 +96,13 @@ function Wishlist() {
 
             <Header />
 
-            <h1 className="text-3xl font-bold text-white mb-8 text-center">
+            {/* <h1 className="text-3xl font-bold text-white mb-8 text-center">
                 MY WISHLIST
-            </h1>
+            </h1> */}
 
             {products.length === 0 ? (
-                <div className="flex justify-center items-center h-64">
-                    <h2 className="text-white text-2xl font-bold">
+                <div className="flex justify-center items-center h-128">
+                    <h2 className="text-white text-3xl font-bold">
                         Your wishlist is empty
                     </h2>
                 </div>

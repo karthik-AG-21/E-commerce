@@ -23,6 +23,8 @@ import Users from "./Pages/Admin/Users"
 import AdminUsers from "./Pages/Admin/Users"
 import AdminOrders from "./Pages/Admin/Orders"
 import AdminProducts from "./Pages/Admin/Products"
+import Profile from "./Pages/Profile"
+import ChangePassword from "./Pages/ChangePassword"
 
 
 
@@ -47,6 +49,8 @@ function App() {
 
 
           <Route path="/cart" element={<ProtectedRoute> <Cart /> </ProtectedRoute> }/>
+          <Route path="/profile" element={<ProtectedRoute> <Profile/> </ProtectedRoute> }/>
+          <Route path="/change-password" element={<ProtectedRoute> <ChangePassword/> </ProtectedRoute> }/>
           
 
           <Route path="/wishlist" element={ <ProtectedRoute> <Wishlist /> </ProtectedRoute>}/>

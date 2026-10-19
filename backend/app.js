@@ -12,6 +12,7 @@ import cartRouter from './routers/cartRouter.js';
 import wishlistRouter from './routers/wishlistRouter.js';
 import orderRouter from './routers/orderRouter.js';
 import adminRouter from './routers/adminRouter.js';
+import userRouter from './routers/userRouter.js';
 
 
 dotenv.config();
@@ -69,9 +70,13 @@ app.use("/cart", cartRouter);
 
 app.use("/wishlist", wishlistRouter);
 
+app.use("/user", userRouter)
+
 app.use("/orders", orderRouter);
 
 app.use("/admin", adminRouter);
+
+
 
 
 app.get("/", (req, res) => {

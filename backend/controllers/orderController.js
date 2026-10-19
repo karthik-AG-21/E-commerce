@@ -87,26 +87,80 @@ export const createOrder = async (req, res) => {
 
 
 };
-
-
 export const getMyOrders = async (req, res) => {
-
     try {
-
         const userId = req.user.id;
 
-        const orders = await Order.find({ user: userId })
-        .populate("items.product", "title price images thumbnail").sort({ createdAt: -1 });
+        // Pagination
+        const page = Math.max(1 , parseInt(req.query.page, 10) || 1);
 
-        return res.status(200).json({success: true, count: orders.length, data: orders });
+        const limit = Math.min(20,Math.max(1, parseInt(req.query.limit, 10) || 5));
 
+        const skip = (page - 1) * limit;
+
+        // Search by product name
+        const search = String(req.query.search ?? "").trim();
+
+        // Filter only this user's orders
+        const filter = { user: userId };
+
+        if (search) {
+            // Escape special regex characters
+            const escapedSearch = search.replace(
+                /[.*+?^${}()|[\]\\]/g,
+                "\\$&"
+            );
+
+            const searchRegex = new RegExp(escapedSearch, "i");
+
+            // Find products whose titles match the search
+            const matchingProducts = await Product.find({
+                title: searchRegex,
+            }).select("_id").lean();
+
+            const productIds = matchingProducts.map(
+                (product) => product._id
+            );
+
+            // Match saved titles or referenced product IDs
+            filter.$or = [
+                {"items.title": searchRegex },
+                {"items.product": { $in: productIds } },
+            ];
+        }
+
+        // Fetch current page and count matching orders
+        const [orders, totalOrders] = await Promise.all([
+            Order.find(filter)
+                .populate(
+                    "items.product",
+                    "title price images thumbnail"
+                ).sort({ createdAt: -1, _id: -1 }).skip(skip).limit(limit),
+
+            Order.countDocuments(filter),
+        ]);
+
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        return res.status(200).json({
+            success: true,
+            count: orders.length,
+            data: orders,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalOrders,
+                limit,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+            },
+        });
     } catch (error) {
-        
         console.error("Get orders error:", error);
 
-        return res.status(500).json({ success: false, message: "Failed to retrieve orders" });
-
-        
+        return res.status(500).json({
+            success: false,
+            message: "Failed to retrieve orders",
+        });
     }
-
 };

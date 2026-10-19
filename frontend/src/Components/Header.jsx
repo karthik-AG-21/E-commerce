@@ -166,21 +166,13 @@ function Header() {
 
     const userId = localStorage.getItem("userId");
 
-    const {
-        data: cartData,
-    } = useGetCart(userId);
+    const { data: cartData, } = useGetCart(userId);
 
-    const {
-        data: wishlistData,
-    } = useGetWishlist(userId);
+    const { data: wishlistData, } = useGetWishlist(userId);
 
-    const cartItems = useSelector(
-        (state) => state.cart.items ?? []
-    );
+    const cartItems = useSelector((state) => state.cart.items ?? []);
 
-    const wishlistItems = useSelector(
-        (state) => state.wishlist.items ?? []
-    );
+    const wishlistItems = useSelector((state) => state.wishlist.items ?? []);
 
     // Sync API data with Redux
     useEffect(() => {
@@ -199,20 +191,28 @@ function Header() {
         }
     }, [userId, cartData, wishlistData, dispatch]);
 
+    const userData = (() => {
+        try {
+            return JSON.parse(localStorage.getItem("user") || "null");
+        } catch {
+            return null;
+        }
+    })();
+
     // Total quantity of products in cart
-    const cartCount = cartItems.reduce(
-        (total, item) => total + (Number(item.quantity) || 1),
-        0
-    );
+    const cartCount = cartItems.reduce((total, item) => total + (Number(item.quantity) || 1), 0);
 
     function removeUser() {
         localStorage.removeItem("userId");
+        localStorage.removeItem("user");
 
         dispatch(setCart([]));
         dispatch(setWishlist([]));
 
         navigate("/login");
     }
+
+
 
     const menus = [
         { id: 1, name: "Home", path: "/" },
@@ -247,8 +247,8 @@ function Header() {
                             onClick={() => navigate(menu.path)}
                             aria-current={isActive ? "page" : undefined}
                             className={`transition-all duration-300 pb-1 ${isActive
-                                    ? "text-white border-b-2 border-indigo-500"
-                                    : "text-zinc-300 hover:text-white"
+                                ? "text-white border-b-2 border-indigo-500"
+                                : "text-zinc-300 hover:text-white"
                                 }`}
                         >
                             {menu.name}
@@ -266,12 +266,13 @@ function Header() {
                         <button
                             onClick={() => navigate("/cart")}
                             aria-label={`Shopping cart, ${cartCount} items`}
-                            className="relative text-xl text-zinc-300 hover:text-white transition-colors duration-300"
-                        >
+                            className="relative text-xl text-zinc-300
+                             hover:text-white transition-colors duration-300">
                             <FaShoppingCart />
 
                             {cartCount > 0 && (
-                                <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
+                                <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 
+                                rounded-full bg-red-500 text-white text-[10px] flex items-center justify-center">
                                     {cartCount}
                                 </span>
                             )}
@@ -281,16 +282,30 @@ function Header() {
                         <button
                             onClick={() => navigate("/wishlist")}
                             aria-label={`Wishlist, ${wishlistItems.length} items`}
-                            className="relative text-xl text-zinc-300 hover:text-white transition-colors duration-300"
-                        >
+                            className="relative text-xl text-zinc-300
+                            hover:text-white transition-colors duration-300">
                             <FaRegHeart />
 
                             {wishlistItems.length > 0 && (
-                                <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center">
+                                <span className="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full
+                                 bg-indigo-600 text-white text-[10px] flex items-center justify-center">
                                     {wishlistItems.length}
                                 </span>
                             )}
                         </button>
+                        <div
+                            onClick={() => navigate("/profile")}
+                            title="My Profile"
+                            className="w-10 h-10 rounded-full
+                            bg-indigo-600/20 border border-indigo-500/50
+                            flex items-center justify-center
+                            text-indigo-300 font-bold text-lg
+                            cursor-pointer
+                            hover:bg-indigo-600 hover:text-white
+                            transition-all duration-300">
+                            {userData?.name?.trim()?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+
                     </>
                 )}
 
@@ -298,16 +313,15 @@ function Header() {
                 {userId ? (
                     <button
                         onClick={removeUser}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-all"
-                    >
-                        <IoIosLogOut className="text-xl" />
-                        Logout
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border
+                        border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-all">
+                        <IoIosLogOut className="text-xl" />Logout
                     </button>
                 ) : (
                     <button
                         onClick={() => navigate("/login")}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-all"
-                    >
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border
+                        border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-all">
                         <CiUser className="text-xl" />
                         Login
                     </button>

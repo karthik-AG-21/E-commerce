@@ -5,14 +5,13 @@ import CategoryChart from "../../Components/Admin/CategoryChart";
 import RevenueChart from "../../Components/Admin/RevenueChart";
 import StatCard from "../../Components/Admin/StatCard";
 import useProducts from "../../hooks/useProducts";
-// import useGetUsers from "../../hooks/Admin/useGetUsers";
-// import useMobiles from "../../hooks/useMobiles";
+import useGetUsers from "../../hooks/Admin/useGetUsers";
 
 
 
 function Dashboard() {
 
-    // const { data : users , isLoading , error } = useGetUsers();
+    const { data : users , isLoading , error } = useGetUsers();
     const { data : products , isLoading : prodIsLoading , error : prodError } = useProducts()
 
     // if(isLoading){
@@ -31,12 +30,12 @@ function Dashboard() {
         return <h1>error</h1>
     }
 
-    const allOrders = users.flatMap((user) => user.orders || []);
+    // const allOrders = users.flatMap((user) => user.orders || []);
 
-    const totalPrice = Math.ceil(allOrders.reduce((sum , item)=>sum+=item.totalPrice,0))
+    // const totalPrice = Math.ceil(allOrders.reduce((sum , item)=>sum+=item.totalPrice,0))
     
 
-    console.log(totalPrice)
+    // console.log(totalPrice)
     
 
 
@@ -50,12 +49,12 @@ function Dashboard() {
 
                     <Header page={"Dashboard"} content={"Wellcome back, "} role={" Admin"} />
 
-                    <StatCard users={users} allOrders={allOrders}  totalPrice={totalPrice} products={products}/>
+                    <StatCard users={users}  products={products}/>
                     <div className="flex gap-5 w-full p-5">
 
-                        <div className="w-2/3">
+                        {/* <div className="w-2/3">
                             <RevenueChart allOrders={allOrders} />
-                        </div>
+                        </div> */}
 
                         <div className="w-1/3">
                             <CategoryChart products={products}/>
