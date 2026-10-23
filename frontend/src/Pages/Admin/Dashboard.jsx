@@ -14,13 +14,13 @@ function Dashboard() {
     const { data : users , isLoading , error } = useGetUsers();
     const { data : products , isLoading : prodIsLoading , error : prodError } = useProducts()
 
-    // if(isLoading){
-    //     return <h1>loading..</h1>
-    // }
+    if(isLoading){
+        return <h1>loading..</h1>
+    }
 
-    // if(error){
-    //     return <h1>error</h1>
-    // }
+    if(error){
+        return <h1>error</h1>
+    }
 
     if(prodIsLoading){
         return <h1>loading..</h1>
@@ -30,9 +30,9 @@ function Dashboard() {
         return <h1>error</h1>
     }
 
-    // const allOrders = users.flatMap((user) => user.orders || []);
+    const allOrders = users.flatMap((user) => user.orders || []);
 
-    // const totalPrice = Math.ceil(allOrders.reduce((sum , item)=>sum+=item.totalPrice,0))
+    const totalPrice = Math.ceil(allOrders.reduce((sum , item)=>sum+=item.totalPrice,0))
     
 
     // console.log(totalPrice)
@@ -52,9 +52,9 @@ function Dashboard() {
                     <StatCard users={users}  products={products}/>
                     <div className="flex gap-5 w-full p-5">
 
-                        {/* <div className="w-2/3">
+                        <div className="w-2/3">
                             <RevenueChart allOrders={allOrders} />
-                        </div> */}
+                        </div>
 
                         <div className="w-1/3">
                             <CategoryChart products={products}/>

@@ -1,3 +1,4 @@
+
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useUpdateWishlist from "../Wishlist/useUpdateWishlist";
@@ -10,23 +11,27 @@ function useAddToWishlist(product) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const wishlist = useSelector(
-        (state) => state.wishlist.items
+    // Read all wishlist product IDs from Redux
+    const wishlistProductIds = useSelector(
+        (state) => state.wishlist.productIds ?? []
     );
 
-    const { mutateAsync , isPending } = useUpdateWishlist();
+    const { mutateAsync, isPending } = useUpdateWishlist();
 
     const userId = localStorage.getItem("userId");
 
-    const isWishlisted = wishlist.some(
-        (item) => String(item.product?._id) === String(product._id)
-    );
+    // Check by product ID, regardless of pagination
+    const isWishlisted =
+        Array.isArray(wishlistProductIds) &&
+        wishlistProductIds.includes(String(product?._id));
 
     const toggleWishlist = async () => {
         if (!userId) {
             navigate("/login");
             return;
         }
+
+        if (!product?._id || isPending) return;
 
         try {
             if (isWishlisted) {
@@ -55,7 +60,7 @@ function useAddToWishlist(product) {
     return {
         toggleWishlist,
         isWishlisted,
-        isPending
+        isPending,
     };
 }
 

@@ -149,10 +149,28 @@ import ProductsToolbar from "../Components/ProductsToolbar";
 import ProductGrid from "../Components/ProductGrid";
 
 import useProducts from "../hooks/useProducts";
+import { useDispatch } from "react-redux";
+import useGetWishlist from "../hooks/useGetWishlist";
+import { setWishlistProductIds } from "../redux/wishlistSlice";
 
 function Products() {
     const navigate = useNavigate();
     const { category } = useParams();
+
+    const dispatch = useDispatch();
+    const user = localStorage.getItem("userId");
+
+    const { data: wishlistResponse } = useGetWishlist(user, 1, 5);
+
+    useEffect(() => {
+        if (Array.isArray(wishlistResponse?.wishlistProductIds)) {
+            dispatch(
+                setWishlistProductIds(
+                    wishlistResponse.wishlistProductIds
+                )
+            );
+        }
+    }, [wishlistResponse?.wishlistProductIds, dispatch]);
 
     const [brand, setBrand] = useState("all");
     const [sort, setSort] = useState("newest");
@@ -196,7 +214,7 @@ function Products() {
     const products = data?.data ?? [];
     const pagination = data?.pagination;
 
-    const handleBrandChange = (e) => {setBrand(e.target.value); setPage(1)};
+    const handleBrandChange = (e) => { setBrand(e.target.value); setPage(1) };
 
     const handleSortChange = (e) => {
         setSort(e.target.value);
@@ -243,6 +261,8 @@ function Products() {
         );
     }
 
+    
+
     return (
         <>
             <div className="bg-[#0B0B0F] min-h-screen">
@@ -253,7 +273,7 @@ function Products() {
                 <SearchBar value={search} onChange={handleSearch} />
 
                 <ProductFilters category={category} onCategoryChange={handleCategoryChange} brand={brand}
-                    onBrandChange={handleBrandChange} sort={sort} onSortChange={handleSortChange}/>
+                    onBrandChange={handleBrandChange} sort={sort} onSortChange={handleSortChange} />
 
                 <ProductsToolbar clearFilter={clearFilter} />
 
