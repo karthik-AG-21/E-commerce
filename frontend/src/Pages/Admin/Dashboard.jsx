@@ -6,37 +6,46 @@ import RevenueChart from "../../Components/Admin/RevenueChart";
 import StatCard from "../../Components/Admin/StatCard";
 import useProducts from "../../hooks/useProducts";
 import useGetUsers from "../../hooks/Admin/useGetUsers";
+import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
+import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
 
 
 
 function Dashboard() {
 
-    const { data : users , isLoading , error } = useGetUsers();
-    const { data : products , isLoading : prodIsLoading , error : prodError } = useProducts()
+    const { data: users, isLoading, error } = useGetUsers();
+    const { data: products, isLoading: prodIsLoading, error: prodError } = useGetAllProducts()
+    const { data: orders, isLoading: orderIsLoading, error: orderError } = useGetAllOrders();
 
-    if(isLoading){
+    if (isLoading) {
         return <h1>loading..</h1>
     }
 
-    if(error){
+    if (error) {
         return <h1>error</h1>
     }
 
-    if(prodIsLoading){
+    if (prodIsLoading) {
         return <h1>loading..</h1>
     }
 
-    if(prodError){
+    if (prodError) {
+        return <h1>error</h1>
+    }
+    if (orderIsLoading) {
+        return <h1>loading..</h1>
+    }
+
+    if (orderError) {
         return <h1>error</h1>
     }
 
-    const allOrders = users.flatMap((user) => user.orders || []);
+    const allOrders = orders || [];
 
-    const totalPrice = Math.ceil(allOrders.reduce((sum , item)=>sum+=item.totalPrice,0))
-    
+    const totalPrice = Math.ceil(allOrders.reduce((sum, order) => sum + Number(order?.totalAmount || 0),0));
 
-    // console.log(totalPrice)
-    
+    console.log(totalPrice , "price" , allOrders?.length, "length")
+
 
 
     return (
@@ -49,7 +58,7 @@ function Dashboard() {
 
                     <Header page={"Dashboard"} content={"Wellcome back, "} role={" Admin"} />
 
-                    <StatCard users={users}  products={products}/>
+                    <StatCard users={users} allOrders={allOrders}  totalPrice={totalPrice}  products={products} />
                     <div className="flex gap-5 w-full p-5">
 
                         <div className="w-2/3">
@@ -57,12 +66,12 @@ function Dashboard() {
                         </div>
 
                         <div className="w-1/3">
-                            <CategoryChart products={products}/>
+                            <CategoryChart products={products} />
                         </div>
 
                     </div>
 
-                    
+
 
 
                 </main>

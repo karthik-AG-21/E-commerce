@@ -4,12 +4,13 @@ import SideBar from "../../Components/Admin/AdminSidebar";
 // import useGetUsers from "../../hooks/Admin/useGetUsers";
 import { useState } from "react";
 import useUpdateOrderStatus from "../../hooks/Admin/useUpdateOrderStatus";
+import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
 
 
 
 function AdminOrders() {
 
-    // const { data, isLoading, error } = useGetUsers()
+    const { data, isLoading, error } = useGetAllOrders()
 
     const updateStatus = useUpdateOrderStatus()
 
@@ -17,19 +18,19 @@ function AdminOrders() {
     const [filter , setFilter] = useState("")
     const [currentPage , setCurrentPage] = useState(1)
 
-    // if (isLoading) {
-    //     return <h1>loading ... </h1>
-    // }
+    if (isLoading) {
+        return <h1>loading ... </h1>
+    }
 
-    // if (error) {
-    //     return <h1>error</h1>
-    // }
+    if (error) {
+        return <h1>error</h1>
+    }
 
    
 
-    // const allOrders = data.map((item) => item?.orders).flat()
+    let allOrders = data.map((item) => item?.orders).flat()
 
-    const allOrders = data.flatMap((user) =>(user.orders || []).map((order) => ({...order,userId: user.id,})));
+    allOrders = data.flatMap((user) =>(user.orders || []).map((order) => ({...order, userId: user.id })));
 
     console.log(allOrders[0]?.userId)
 

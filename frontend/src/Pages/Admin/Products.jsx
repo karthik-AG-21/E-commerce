@@ -1,6 +1,5 @@
 import Header from "../../Components/Admin/AdminHeader";
 import SideBar from "../../Components/Admin/AdminSidebar";
-import useMobiles from "../../hooks/useMobiles";
 import { MdOutlineModeEdit } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { CiFilter } from "react-icons/ci";
@@ -11,13 +10,14 @@ import useAddProduct from "../../hooks/Admin/useAddProducts";
 import useUpdateProduct from "../../hooks/Admin/useUpdateProducts";
 import useDeleteProduct from "../../hooks/Admin/useDeleteProduct";
 import { toast } from "react-toastify";
+import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
 
 function AdminProducts() {
     const addProduct = useAddProduct();
     const updateProduct = useUpdateProduct();
     const deleteProduct = useDeleteProduct();
 
-    const { data: products = [], prodIsLoading, prodError } = useMobiles();
+    const { data: products, isLoading: prodIsLoading, error: prodError } = useGetAllProducts()
 
     const [search, setSearch] = useState("")
 

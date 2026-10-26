@@ -1,14 +1,17 @@
 import { CiFilter } from "react-icons/ci";
 import Header from "../../Components/Admin/AdminHeader";
 import SideBar from "../../Components/Admin/AdminSidebar";
-// import useGetUsers from "../../hooks/Admin/useGetUsers";
+import useGetUsers from "../../hooks/Admin/useGetUsers";
 import { useState } from "react";
 import useUpdateUserStatus from "../../hooks/Admin/useUpdateUserStatus";
 
 
+
 function AdminUsers() {
 
-    // const { data, isLoading, error } = useGetUsers();
+    const { data, isLoading, error } = useGetUsers();
+    
+
     const [search, setSearch] = useState("")
 
     const updateUserStatus = useUpdateUserStatus();
@@ -25,6 +28,7 @@ function AdminUsers() {
         return <h1>somthing is wrong</h1>
     }
 
+    
     console.log(data)
 
 
@@ -150,7 +154,7 @@ function AdminUsers() {
                                 <th className="text-left p-3">Role</th>
 
 
-                                <th className="text-left p-3">Orders</th>
+                                {/* <th className="text-left p-3">Orders</th> */}
 
                                 <th className="text-left p-3">Actions</th>
                             </tr>
@@ -166,7 +170,7 @@ function AdminUsers() {
                                         <td className="p-3">{item.name}</td>
                                         <td className="p-3">{item.email}</td>
                                         <td className="p-3">{item.role}</td>
-                                        <td className="p-3 ">{item.orders.length}</td>
+                                        {/* <td className="p-3 ">{orders?.length}</td> */}
                                         <td className="p-3">
                                             <button className="bg-red-600 py-2 px-4 rounded w-24" 
                                             onClick={() => handleBlock(item)}

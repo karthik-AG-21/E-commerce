@@ -9,7 +9,11 @@ const RevenueChart = ({ allOrders = [] }) => {
   const revenueMap = {};
 
   allOrders.forEach((order) => {
-    const date = new Date(order.orderedAt);
+    if (!order.createdAt) return;
+
+    const date = new Date(order.createdAt);
+
+     if (Number.isNaN(date.getTime())) return;
 
     const dateKey = date.toISOString().split("T")[0];
 
@@ -17,13 +21,13 @@ const RevenueChart = ({ allOrders = [] }) => {
       revenueMap[dateKey] = 0;
     }
 
-    revenueMap[dateKey] += Number(order.totalPrice);
+    revenueMap[dateKey] += Number(order?.totalAmount || 0);
   });
 
   const revenueData = Object.entries(revenueMap)
     .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
     .map(([date, revenue]) => ({
-      day: new Date(date).toLocaleDateString("en-US", {
+      day: new Date(date + "T00:00:00").toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       }),

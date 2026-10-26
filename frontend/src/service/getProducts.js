@@ -6,6 +6,8 @@ async function getProducts(filters = {}) {
         params: { category, search, brand, sort, page, limit, },
     });
 
+    console.log("all prod", res.data)
+
     return res.data;
 }
 

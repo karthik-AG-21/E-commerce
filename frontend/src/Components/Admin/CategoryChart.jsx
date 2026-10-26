@@ -34,10 +34,10 @@ const categoryConfig = [
 
 const CategoryChart = ({ products = [] }) => {
 
-    // const categoryData = categoryConfig.map((category) => ({ ...category, value: products.filter(
-    //         (product) => product.category === category.category).length,}));
+    const categoryData = categoryConfig.map((category) => ({ ...category, value: products.filter(
+            (product) => product.category === category.category).length,}));
 
-            // console.log(categoryData)
+            console.log(categoryData)
 
     return (
         <div className="bg-[#111827] text-white backdrop-blur-md p-5 rounded-xl">
@@ -53,14 +53,14 @@ const CategoryChart = ({ products = [] }) => {
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
 
-                            <Pie  dataKey="value" nameKey="name" innerRadius={60}
+                            <Pie   data={categoryData} dataKey="value" nameKey="name" innerRadius={60}
                                 outerRadius={90} paddingAngle={2}>
-                                {/* {categoryData.map((item, index) => (
+                                {categoryData.map((item, index) => (
                                     <Cell key={index} fill={item.chartColor} />
-                                ))} */}
+                                ))}
                             </Pie>
 
-                        </PieChart >
+                        </PieChart  >
                     </ResponsiveContainer>
 
                     {/* Center text */}
@@ -79,7 +79,7 @@ const CategoryChart = ({ products = [] }) => {
                 {/* Category list */}
                 <div className="flex-1 space-y-4">
 
-                    {/* {
+                    {
                         categoryData.map((category) => (
                             <div key={category.name} className="flex items-center justify-between" >
                                 <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ const CategoryChart = ({ products = [] }) => {
                                 <span>{category.value}</span>
                             </div>
                         ))
-                    } */}
+                    }
 
                 </div>
 
