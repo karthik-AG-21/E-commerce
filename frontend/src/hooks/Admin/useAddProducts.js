@@ -1,19 +1,29 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addProduct } from "../../service/Admin/addProduct";
+import addProduct from "../../service/Admin/addProduct";
+import { toast } from "react-toastify";
 
-
-const useAddProduct = () => {
+function useAddProduct() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: addProduct,
 
-        onSuccess: () => {
+        onSuccess: (data) => {
+            toast.success(data.message || "Product added successfully");
+
             queryClient.invalidateQueries({
-                queryKey: ["mobiles"],
+                queryKey: ["products"],
             });
         },
+
+        onError: (error) => {
+            toast.error(
+                error.response?.data?.message ||
+                "Failed to add product"
+            );
+        },
     });
-};
+}
 
 export default useAddProduct;

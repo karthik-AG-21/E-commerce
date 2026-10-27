@@ -1,17 +1,23 @@
 import express from "express";
-import { blockUser, getAllOrders, getAllProducts, getAllUsers } from "../controllers/adminController.js";
+import { blockUser,  createProduct,  getAllOrders, 
+     getAllProducts,  getAllUsers,  
+     updateProduct} from "../controllers/adminController.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 
 const adminRouter  = express.Router();
 
-adminRouter.get("/users", getAllUsers);
+adminRouter.get("/users", authMiddleware ,  getAllUsers);
 
+adminRouter.patch("/block", authMiddleware , blockUser);
 
-adminRouter.put("/block", blockUser);
+adminRouter.get("/products", authMiddleware , getAllProducts);
 
-adminRouter.get("/orders", getAllOrders);
+adminRouter.post("/products/create", authMiddleware , createProduct);
 
-adminRouter.get("/products", getAllProducts);
+adminRouter.put("/products/:id", authMiddleware , updateProduct);
+
+adminRouter.get("/orders",authMiddleware ,  getAllOrders);
 
 
 

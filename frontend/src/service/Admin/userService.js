@@ -1,8 +1,8 @@
-import axios from "axios";
+import api from "../../api/api.js";
 
- const updateUserStatus = async ({ userId, status }) => {
+const updateUserStatus = async ({ userId, status, }) => {
 
-    const response = await axios.patch(`http://localhost:3000/users/${userId}`,{isBlocked: status,});
+    const response = await api.patch(`/admin/block`,{ userId , status });
 
     return response.data;
 };

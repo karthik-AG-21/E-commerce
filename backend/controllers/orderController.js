@@ -106,10 +106,7 @@ export const getMyOrders = async (req, res) => {
 
         if (search) {
             // Escape special regex characters
-            const escapedSearch = search.replace(
-                /[.*+?^${}()|[\]\\]/g,
-                "\\$&"
-            );
+            const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 
             const searchRegex = new RegExp(escapedSearch, "i");
 

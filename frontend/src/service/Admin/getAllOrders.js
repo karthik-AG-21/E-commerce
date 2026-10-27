@@ -5,7 +5,8 @@ async function getAllOrders(){
 
     const res =  await api.get("/admin/orders")
 
-    console.log("allOrders", res.data.data)
+    console.log("allOrders", res.data);
+
     return res.data.data
 }
 

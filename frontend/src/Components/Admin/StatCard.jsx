@@ -11,7 +11,7 @@ function StatCard({users , allOrders , totalPrice , products }){
     const navigate = useNavigate()
     
     const totalOrders = allOrders?.length;
-    const totalProducts = products?.length
+    const totalProducts = products?.data?.length
     
     
    

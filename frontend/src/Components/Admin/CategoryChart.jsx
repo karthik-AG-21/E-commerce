@@ -34,7 +34,7 @@ const categoryConfig = [
 
 const CategoryChart = ({ products = [] }) => {
 
-    const categoryData = categoryConfig.map((category) => ({ ...category, value: products.filter(
+    const categoryData = categoryConfig.map((category) => ({ ...category, value: products?.data.filter(
             (product) => product.category === category.category).length,}));
 
             console.log(categoryData)
@@ -48,7 +48,7 @@ const CategoryChart = ({ products = [] }) => {
             <div className="flex items-center gap-6">
 
                 {/* Donut */}
-                <div className="w-1/2 h-[250px] relative">
+                <div className="w-1/2 h-62.5 relative">
 
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>

@@ -23,40 +23,44 @@ function Login() {
 
         try {
 
-            
+
             const data = await loginRequest(formData);
 
             const user = data.data
 
-            console.log(user,"hhh")
+            console.log(user, "hhh")
 
             console.log(user)
 
-            const userDetails = { name:user?.name , email:user?.email, role:user?.role, id:user?.id }
+            const userDetails = { name: user?.name, email: user?.email, role: user?.role, id: user?.id }
 
             localStorage.setItem("userId", user?.id);
 
-            localStorage.setItem("user", JSON.stringify(userDetails) )
+            localStorage.setItem("user", JSON.stringify(userDetails))
 
 
-            console.log(user.role,"hhhehehe")
+            console.log(user.role, "hhhehehe")
 
             if (user?.role == "admin") {
                 toast.success(`Welcome ${user?.name}!`);
                 navigate("/Dashboard")
             } else {
-                if(!user?.isBlocked){
+                if (user?.isBlocked) {
+                    toast.error(`Your Blocked`);
+                } else {
                     toast.success(`Welcome ${user?.name}!`);
                     navigate("/");
-                }else{
-                    toast.error(`Your Blocked`);
+
                 }
-                
+
             }
 
         } catch (error) {
-            setLoginError(error.message);
-            toast.error(error.message);
+            const message =
+                error.response?.data?.message || "Login failed. Please try again.";
+
+            setLoginError(message);
+            toast.error(message);
         } finally {
             setIsLoading(false);
         }

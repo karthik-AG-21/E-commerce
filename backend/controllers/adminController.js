@@ -1,96 +1,81 @@
+import Order from "../models/orderSchema.js";
+import Product from "../models/productSchema.js";
+import User from "../models/userSchema.js";
 
-import User from "../models/User.js";
 
-// GET /api/admin/users
-export const getUsers = async (req, res) => {
+export const getAllUsers = async (req, res) => {
+
     try {
-        const {
-            search = "",
-            filter = "",
-            page = 1,
-            limit = 8,
-        } = req.query;
 
-        const pageNumber = Math.max(1, Number(page) || 1);
-        const pageSize = Math.min(
-            100,
-            Math.max(1, Number(limit) || 8)
-        );
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 8;
 
-        // Exclude admin accounts
-        const query = {
-            role: { $ne: "admin" },
-        };
+        const search = req.query.search || "";
+        const filter = req.query.filter || "";
+        const sort = req.query.sort || "newest-users";
 
-        // Search users by name
-        if (search.trim()) {
-            const escapedSearch = search.trim().replace(
-                /[.*+?^${}()|[\]\\]/g,
-                "\\$&"
-            );
 
-            query.name = {
-                $regex: escapedSearch,
-                $options: "i",
-            };
+        const query = { role: { $ne: "admin" } };
+
+        if (search) {
+            query.name = { $regex: search, $options: "i" };
         }
 
-        // Active / inactive filter
+        // Filter users
         if (filter === "active") {
             query.isBlocked = false;
         } else if (filter === "inactive") {
             query.isBlocked = true;
         }
 
-        // Sorting
-        const sortOptions = {
-            "a-z": { name: 1, _id: 1 },
-            "z-a": { name: -1, _id: 1 },
-            "newest-users": { createdAt: -1, _id: -1 },
-            "oldest-users": { createdAt: 1, _id: 1 },
-        };
 
-        const sort = sortOptions[filter] || {
-            createdAt: -1,
-            _id: -1,
-        };
+        let sortOption = { createdAt: -1 };
 
-        // Count matching users before pagination
+        if (sort === "a-z") sortOption = { name: 1 };
+        if (sort === "z-a") sortOption = { name: -1 };
+        if (sort === "oldest-users") sortOption = { createdAt: 1 };
+
+        // Get users and count
         const totalUsers = await User.countDocuments(query);
 
-        const users = await User.find(query)
-            .select("-password")
-            .sort(sort)
-            .skip((pageNumber - 1) * pageSize)
-            .limit(pageSize)
-            .lean();
+        const users = await User.find(query).select("-password").sort(sortOption).skip((page - 1) * limit).limit(limit);
+
+        const usersWithOrders = [];
+
+        for (const user of users) {
+            const orderCount = await Order.countDocuments({
+                user: user._id,
+            });
+
+            usersWithOrders.push({
+                ...user.toObject(),
+                orders: orderCount,
+            });
+        }
 
         return res.status(200).json({
             success: true,
-            users,
+            data: usersWithOrders,
             pagination: {
-                currentPage: pageNumber,
-                totalPages: Math.ceil(totalUsers / pageSize),
+                currentPage: page,
+                totalPages: Math.ceil(totalUsers / limit),
                 totalUsers,
-                limit: pageSize,
+                limit,
             },
         });
     } catch (error) {
-        console.error("Get users error:", error);
-
         return res.status(500).json({
             success: false,
-            message: "Failed to fetch users",
+            message: error.message,
         });
     }
 };
 
 
-
-export const updateUserStatus = async (req, res) => {
+export const blockUser = async (req, res) => {
     try {
-        const { userId } = req.params;
-        const { status } = req.body;
+        
+        const { userId , status } = req.body;
 
         if (typeof status !== "boolean") {
             return res.status(400).json({
@@ -99,19 +84,8 @@ export const updateUserStatus = async (req, res) => {
             });
         }
 
-        const user = await User.findOneAndUpdate(
-            {
-                _id: userId,
-                role: { $ne: "admin" },
-            },
-            {
-                $set: { isBlocked: status },
-            },
-            {
-                new: true,
-                runValidators: true,
-            }
-        ).select("-password");
+        const user = await User.findOneAndUpdate({ _id: userId, role: { $ne: "admin" }, }, { $set: { isBlocked: status }, },
+            { returnDocument: true, runValidators: true, }).select("-password");
 
         if (!user) {
             return res.status(404).json({
@@ -122,9 +96,7 @@ export const updateUserStatus = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: status
-                ? "User blocked successfully"
-                : "User unblocked successfully",
+            message: status ? "User blocked successfully" : "User unblocked successfully",
             user,
         });
     } catch (error) {
@@ -136,3 +108,145 @@ export const updateUserStatus = async (req, res) => {
         });
     }
 };
+
+
+export const getAllProducts = async (req, res) => {
+    try {
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 8;
+        const search = req.query.search || "";
+        const filter = req.query.filter || "";
+
+        const query = {};
+
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        const sortOptions = {
+            "high-low": { price: -1 },
+            "low-high": { price: 1 },
+            rating: { rating: -1 },
+            stock: { stock: -1 },
+        };
+
+        const sortOption = sortOptions[filter] || { _id: -1 };
+
+        const [products, totalProducts] = await Promise.all([
+            Product.find(query)
+                .sort(sortOption)
+                .skip((page - 1) * limit)
+                .limit(limit),
+
+            Product.countDocuments(query),
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            data: products,
+            pagination: {
+                currentPage: page,
+                totalPages: Math.ceil(totalProducts / limit),
+                totalProducts,
+                limit,
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+
+export const createProduct = async (req, res) => {
+    try {
+        const { title, category, price, stock, rating, image } = req.body;
+
+        if (!title?.trim() || !category?.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Product title and category are required",
+            });
+        }
+
+        if (price == null || Number(price) <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Price must be greater than 0",
+            });
+        }
+
+        const product = await Product.create({
+            title: title.trim(),
+            category: category.trim(),
+            price: Number(price),
+            stock: Number(stock ?? 0),
+            rating: Number(rating ?? 0),
+            image,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Product created successfully",
+            data: product,
+        });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+export const updateProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const product = await Product.findByIdAndUpdate(id,{ $set: req.body },{returnDocument: "after", runValidators: true,});
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+            data: product,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+export const getAllOrders = async (req, res) => {
+    try {
+        const orders = await Order.find();
+
+        res.status(200).json({
+            success: true,
+            data: orders,
+            message: "orders fetched successfully"
+        });
+    } catch (error) {
+        console.error("GET ALL ORDERS ERROR:", error);
+
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+

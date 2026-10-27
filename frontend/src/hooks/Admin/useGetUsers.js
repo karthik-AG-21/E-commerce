@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import getUsers from "../../service/Admin/getUsers";
 
-function useGetUsers(){
+function useGetUsers({ page, limit, search, filter, sort } = {}){
 
     return useQuery({
-        queryKey:["users"],
-        queryFn:getUsers,
+        queryKey: ["users", page, limit, search, filter, sort],
+        queryFn:() => getUsers({ page, limit, search, filter, sort }),
+        placeholderData: (previousData) => previousData,
     })
 }
 

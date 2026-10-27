@@ -4,17 +4,18 @@ import SideBar from "../../Components/Admin/AdminSidebar";
 import CategoryChart from "../../Components/Admin/CategoryChart";
 import RevenueChart from "../../Components/Admin/RevenueChart";
 import StatCard from "../../Components/Admin/StatCard";
-import useProducts from "../../hooks/useProducts";
-import useGetUsers from "../../hooks/Admin/useGetUsers";
 import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
 import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
+import useGetDashboardUsers from "../../hooks/Admin/useGetDashboardUsers";
+import useGetUsers from "../../hooks/Admin/useGetUsers";
+
 
 
 
 function Dashboard() {
-
-    const { data: users, isLoading, error } = useGetUsers();
-    const { data: products, isLoading: prodIsLoading, error: prodError } = useGetAllProducts()
+    let limit = 1000
+    const { data: users, isLoading, error } = useGetUsers({limit})
+    const { data: products, isLoading: prodIsLoading, error: prodError } = useGetAllProducts({limit})
     const { data: orders, isLoading: orderIsLoading, error: orderError } = useGetAllOrders();
 
     if (isLoading) {
@@ -58,7 +59,7 @@ function Dashboard() {
 
                     <Header page={"Dashboard"} content={"Wellcome back, "} role={" Admin"} />
 
-                    <StatCard users={users} allOrders={allOrders}  totalPrice={totalPrice}  products={products} />
+                    <StatCard users={users?.data} allOrders={allOrders}  totalPrice={totalPrice}  products={products} />
                     <div className="flex gap-5 w-full p-5">
 
                         <div className="w-2/3">

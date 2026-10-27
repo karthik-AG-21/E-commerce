@@ -28,7 +28,7 @@ function AdminOrders() {
 
    
 
-    let allOrders = data.map((item) => item?.orders).flat()
+    let allOrders = data?.data.map((item) => item?.orders).flat()
 
     allOrders = data.flatMap((user) =>(user.orders || []).map((order) => ({...order, userId: user.id })));
 

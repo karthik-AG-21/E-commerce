@@ -1,11 +1,14 @@
 import axios from "axios";
 
 
-export async function addProduct(product) {
-    const response = await axios.post("http://localhost:3000/products", product);
+import api from "../../api/api.js";
 
-    return response.data;
+async function addProduct(productData) {
+    const res = await api.post("/admin/products/create", productData);
+    return res.data;
 }
+
+export default addProduct;
 
 
 export async function updateProduct({ id, product }) {

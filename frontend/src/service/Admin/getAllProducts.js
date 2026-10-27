@@ -1,10 +1,10 @@
 import api from "../../api/api.js";
 
-const getAllProducts = async() => {
+const getAllProducts = async({ page = 1, limit = 8, search = "", filter = "" } = {}) => {
 
-    const res = await api.get("/admin/products")
-    console.log("all products", res.data)
-    return res.data.data
+    const res = await api.get("/admin/products",{params: { page, limit, search, filter },});
+    
+    return res.data
 }
 
 export default getAllProducts;

@@ -1,105 +1,81 @@
+import { useEffect, useState } from "react";
+import useGetUsers from "../../hooks/Admin/useGetUsers"
+import useUpdateUserStatus from "../../hooks/Admin/useUpdateUserStatus"
+import SideBar from "../../Components/Admin/AdminSidebar"
+import Header from "../../Components/Admin/AdminHeader"
 import { CiFilter } from "react-icons/ci";
-import Header from "../../Components/Admin/AdminHeader";
-import SideBar from "../../Components/Admin/AdminSidebar";
-import useGetUsers from "../../hooks/Admin/useGetUsers";
-import { useState } from "react";
-import useUpdateUserStatus from "../../hooks/Admin/useUpdateUserStatus";
-
-
 
 function AdminUsers() {
 
-    const { data, isLoading, error } = useGetUsers();
-    
-
-    const [search, setSearch] = useState("")
-
-    const updateUserStatus = useUpdateUserStatus();
-
+    const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-
-    const [filter, setFilter] = useState("")
-
-    if (isLoading) {
-        return <h1>loading...</h1>
-    }
-
-    if (error) {
-        return <h1>somthing is wrong</h1>
-    }
-
-    
-    console.log(data)
-
-
-
-    let filterData = data.filter((item) => item.role !== "admin").filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase()));
-
-    function handleSearch(e) {
-        setSearch(e.target.value)
-    }
-
-    function handleFilter(e) {
-
-        setFilter(e.target.value)
-    }
-
-    let filteredUsers = [...filterData];
-
-
-    if (filter === "active") {
-        filteredUsers = filteredUsers.filter(user => !user.isBlocked);
-    }
-
-    if (filter === "inactive") {
-        filteredUsers = filteredUsers.filter(user => user.isBlocked);
-    }
-
-
-    if (filter === "a-z") {
-        filteredUsers.sort((a, b) =>
-            a.name.localeCompare(b.name)
-        );
-    }
-
-    if (filter === "z-a") {
-        filteredUsers.sort((a, b) =>
-            b.name.localeCompare(a.name)
-        );
-    }
-
-    if (filter === "newest-users") {
-        console.log(filteredUsers[0].createdAt, "the date")
-        filteredUsers.sort((a, b) => b.createdAt - a.createdAt);
-        console.log(filteredUsers)
-    }
-
-    if (filter === "oldest-users") {
-        filteredUsers.sort((a, b) => a.createdAt - b.createdAt);
-    }
-
-    console.log(filter)
-
+    const [filter, setFilter] = useState("");
+    const [sort, setSort] = useState("newest-users");
 
     const itemsPerPage = 8;
 
-    const totalPage = Math.ceil(filteredUsers.length / itemsPerPage)
+    const { data, isLoading, isError, error, isFetching } = useGetUsers
+        ({ page: currentPage, limit: itemsPerPage, search: debouncedSearch, filter, sort });
 
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    console.log("Full response:", data);
+    console.log("Users array:", data?.data);
+    console.log("Loading:", isLoading);
+    console.log("Error:", error);
 
-    const lastIndex = startIndex + itemsPerPage;
-
-    const currentUsers = filteredUsers.slice(startIndex, lastIndex)
+    const updateUserStatus = useUpdateUserStatus();
 
 
-    function handleBlock(user) {
-        updateUserStatus.mutate({
-            userId: user.id,
-            status: !user.isBlocked,
-        });
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+            setCurrentPage(1);
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const users = data?.data ?? [];
+    const totalPage = data?.pagination?.totalPages ?? 0;
+    const totalUsers = data?.pagination?.totalUsers ?? 0;
+
+    function handleSearch(e) {
+        setSearch(e.target.value);
     }
 
+    function handleFilter(e) {
+        setFilter(e.target.value);
+        setCurrentPage(1);
+    }
+
+    function handleSort(e) {
+        setSort(e.target.value);
+        setCurrentPage(1);
+    }
+
+    function handleBlock(user) {
+        updateUserStatus.mutate(
+            {
+                userId: user._id,
+                status: !user.isBlocked,
+            },
+            {
+                onSuccess: () => {
+                    console.log("User status updated successfully");
+                },
+                onError: (error) => {
+                    console.error(
+                        "Failed to update user status:",
+                        error.response?.data?.message || error.message
+                    );
+                },
+            }
+        );
+    }
+
+    if (isLoading) return <h1>Loading users...</h1>;
+
+    if (isError) return <h1>{error.message || "Something went wrong"}</h1>;
 
 
     return (
@@ -111,31 +87,40 @@ function AdminUsers() {
 
                     <Header page={"Users"} content={"Dashboard/Users"} />
                     <div className="flex justify-end gap-3 border-b-2 border-white/10 py-2 pr-2">
+                        <input
+                            type="search"
+                            placeholder="Search users..."
+                            value={search}
+                            onChange={handleSearch}
+                            className="py-1 px-2 text-white rounded border-2 border-white/20"
+                        />
 
-                        <div className="flex  gap-3  items-center">
-                            <div>
-                                <input type="search" placeholder="Search Products ..." name="search"
-                                    className="py-1 px-1 text-white  rounded border-2 border-white/20"
-                                    onChange={handleSearch} />
-                            </div>
+                        <div className="relative flex items-center">
+                            <CiFilter className="absolute left-3 z-10 text-white" />
 
-                            <div className="relative flex items-center">
-                                <CiFilter className="absolute left-3 z-10 text-white" />
-
-                                <select className="pl-9 pr-4 py-2 border rounded-md text-white  bg-[#0F1420]"
-                                    value={filter || "all"} onChange={handleFilter}>
-                                    <option value="">Sort /Filter</option>
-                                    <option value="a-z">Name : A - Z </option>
-                                    <option value="z-a">Name : Z - A </option>
-                                    <option value="newest-users">Newest Users</option>
-                                    <option value="oldest-users">Oldest Users</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">inactive</option>
-                                </select>
-                            </div>
+                            <select
+                                value={filter}
+                                onChange={handleFilter}
+                                className="pl-9 pr-4 py-2 border rounded-md text-white bg-[#0F1420]"
+                            >
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Blocked</option>
+                            </select>
                         </div>
 
+                        <select
+                            value={sort}
+                            onChange={handleSort}
+                            className="px-3 py-2 border rounded-md text-white bg-[#0F1420]"
+                        >
+                            <option value="newest-users">Newest Users</option>
+                            <option value="oldest-users">Oldest Users</option>
+                            <option value="a-z">Name: A - Z</option>
+                            <option value="z-a">Name: Z - A</option>
+                        </select>
                     </div>
+
 
                     <table className="w-full min-w-200 text-white">
 
@@ -154,7 +139,7 @@ function AdminUsers() {
                                 <th className="text-left p-3">Role</th>
 
 
-                                {/* <th className="text-left p-3">Orders</th> */}
+                                <th className="text-left p-3">Orders</th>
 
                                 <th className="text-left p-3">Actions</th>
                             </tr>
@@ -163,39 +148,53 @@ function AdminUsers() {
 
 
                         <tbody>
-                            {currentUsers.map((item, index) => (
-                                <>
-                                    <tr key={item.id} className=" border-b border-white/5 hover:bg-white/5">
-                                        <td className="p-3 ">{startIndex + index + 1}</td>
-                                        <td className="p-3">{item.name}</td>
-                                        <td className="p-3">{item.email}</td>
-                                        <td className="p-3">{item.role}</td>
-                                        {/* <td className="p-3 ">{orders?.length}</td> */}
+                            {users.length > 0 ? (
+                                users.map((user, index) => (
+                                    <tr key={user._id} className="border-b border-white/5 text-white">
                                         <td className="p-3">
-                                            <button className="bg-red-600 py-2 px-4 rounded w-24" 
-                                            onClick={() => handleBlock(item)}
-                                                disabled={updateUserStatus.isPending}>
-                                                {item.isBlocked ? "Unblock" : "Block"}
+                                            {(currentPage - 1) * itemsPerPage + index + 1}
+                                        </td>
+                                        <td className="p-3">{user.name}</td>
+                                        <td className="p-3">{user.email}</td>
+                                        <td className="p-3">{user.role}</td>
+                                        <td className="p-3">{user.orders}</td>
+                                        <td className="p-3">
+
+                                            <button
+                                                disabled={updateUserStatus.isPending}
+                                                onClick={() => handleBlock(user)}
+                                                className={`w-20 h-8 inline-flex items-center justify-center 
+                                                    whitespace-nowrap rounded-md
+                                                     text-white text-sm font-medium disabled:opacity-50 
+                                                     ${user.isBlocked ? "bg-indigo-600 hover:bg-indigo-700"
+                                                        : "bg-red-600 hover:bg-red-700"
+                                                    }`}
+                                            >
+                                                {user.isBlocked ? "Unblock" : "Block"}
                                             </button>
 
                                         </td>
-
                                     </tr>
-                                </>
-
-                            )
-
-
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={6} className="p-6 text-center text-zinc-400">
+                                        No users found.
+                                    </td>
+                                </tr>
                             )}
                         </tbody>
                     </table>
 
                     <div className="flex justify-end items-center gap-3 p-4 text-white">
+                        <span className="mr-auto">
+                            {debouncedSearch || filter ? `Matching users: ${totalUsers}` : `Total users: ${totalUsers}`}
+                        </span>
+
                         <button
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(prev => prev - 1)}
-                            className="px-3 py-2 bg-white text-indigo-900 rounded disabled:opacity-40"
-                        >
+                            disabled={currentPage <= 1 || isFetching}
+                            onClick={() => setCurrentPage((prev) => prev - 1)}
+                            className="px-3 py-2 bg-white text-indigo-900 rounded disabled:opacity-40">
                             Previous
                         </button>
 
@@ -204,10 +203,9 @@ function AdminUsers() {
                         </span>
 
                         <button
-                            disabled={currentPage === totalPage}
-                            onClick={() => setCurrentPage(prev => prev + 1)}
-                            className="px-3 py-2 bg-white text-indigo-900 rounded disabled:opacity-40"
-                        >
+                            disabled={currentPage >= totalPage || isFetching || totalPage === 0}
+                            onClick={() => setCurrentPage((prev) => prev + 1)}
+                            className="px-3 py-2 bg-white text-indigo-900 rounded disabled:opacity-40">
                             Next
                         </button>
                     </div>
