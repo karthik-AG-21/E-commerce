@@ -1,53 +1,71 @@
+
 import { FaStar } from "react-icons/fa";
 import AddToCartButton from "./AddToCartButton";
 import WishlistButton from "./WishlistButton";
 import { useNavigate } from "react-router-dom";
 
 function ProductCard({ product }) {
+    const navigate = useNavigate();
 
+    const image =
+        product?.images?.[2] ||
+        product?.images?.[1] ||
+        product?.images?.[0] ||
+        product?.thumbnail;
 
-   const  naviagte = useNavigate()
     return (
-        <div key={product.id} className="relative py-4 flex flex-col shrink-0 w-[250px] h-[450px]
-            rounded-xl bg-[#191A20] border border-white/10
-            transition-all duration-300 hover:-translate-y-1
-            hover:border-indigo-500/40 hover:shadow-xl" onClick={()=>naviagte(`/products/${product.category}/${product?._id}`)}>
-           
-
-            <div className="absolute top-8 left-3 bg-indigo-600 text-white px-3 py-1 rounded-lg">
+        <div
+            className="relative mx-auto flex h-[430px] w-full min-w-0 max-w-[320px] flex-col 
+            overflow-hidden rounded-xl border border-white/10 bg-[#191A20] py-4 transition-all duration-300 hover:-translate-y-1
+             hover:border-indigo-500/40 hover:shadow-xl sm:h-[450px] min-[580px]:max-w-none"
+            onClick={() =>
+                navigate(`/products/${product.category}/${product?._id}`)
+            }
+        >
+            {/* Discount badge */}
+            <div className="absolute left-3 top-7 z-10 rounded-lg bg-indigo-600 px-2 py-1 text-xs text-white sm:px-3 sm:text-sm">
                 {product.discountPercentage}% OFF
             </div>
 
-            
-            <div className="absolute right-3 top-7 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center"
-            onClick={(e)=>e.stopPropagation()}>
+            {/* Wishlist */}
+            <div
+                className="absolute right-3 top-6 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 sm:h-10 sm:w-10"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <WishlistButton product={product} />
             </div>
 
-          
-            <div className="flex-1 flex items-center justify-center px-4 pb-6">
-                <img src={ product?.images[2] || product?.images[1] || product?.images[0] || product?.thumbnail }
-                 alt={product.title} className="w-full h-56 object-contain"/>
+            {/* Product image */}
+            <div className="flex min-h-0 flex-1 items-center justify-center px-3 pb-4 pt-8 sm:px-4 sm:pb-6">
+                <img
+                    src={image}
+                    alt={product.title}
+                    loading="lazy"
+                    className="h-48 w-full max-w-full object-contain sm:h-56"
+                />
             </div>
 
-           
-            <div className="px-3 flex flex-col gap-2 py-1">
-                <h2 className="text-white font-semibold text-xl line-clamp-1">
+            {/* Product details */}
+            <div className="flex flex-col gap-2 px-3 py-1">
+                <h2 className="line-clamp-2 min-h-12 break-words text-base font-semibold text-white sm:text-xl">
                     {product.title}
                 </h2>
 
-                <p className="flex items-center gap-1 text-white">
+                <p className="flex items-center gap-1 text-sm text-white sm:text-base">
                     {product.rating}
                     <FaStar className="text-amber-300" />
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-sm font-medium text-white sm:text-base">
                     ${product.price}
                 </p>
             </div>
 
-            
-            <div className="px-3" onClick={(e)=>e.stopPropagation()}>
+            {/* Add to cart */}
+            <div
+                className="mt-2 px-3"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <AddToCartButton product={product} />
             </div>
         </div>

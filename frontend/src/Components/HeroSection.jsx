@@ -9,7 +9,7 @@ function HeroSection() {
 
     return (
 
-        <section className="relative h-screen overflow-hidden">
+        <section className="relative min-h-screen min-h-[100svh] overflow-hidden">
 
 
             <video autoPlay muted loop playsInline className=" absolute inset-0  w-full h-full object-cover">

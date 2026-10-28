@@ -11,14 +11,9 @@ async function addProduct(productData) {
 export default addProduct;
 
 
-export async function updateProduct({ id, product }) {
-    const response = await axios.patch(`http://localhost:3000/products/${id}`, product);
+export const updateProduct = async ({ id, product }) => {
+    const response = await api.put(`/admin/products/${id}`,product);
 
     return response.data;
-}
+};
 
-export async function deleteProduct(id) {
-    const response = await axios.delete(`http://localhost:3000/products/${id}`);
-
-    return response.data;
-}

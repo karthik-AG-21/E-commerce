@@ -9,10 +9,13 @@ import ProductForm from "../../Components/Admin/ProductForm";
 
 import useAddProduct from "../../hooks/Admin/useAddProducts";
 import useUpdateProduct from "../../hooks/Admin/useUpdateProducts";
-import useDeleteProduct from "../../hooks/Admin/useDeleteProduct";
+
 import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
 
 import { toast } from "react-toastify";
+import useDeleteProduct from "../../hooks/Admin/useSoftDeleteProd";
+import ConfirmDialog from "../../Components/Admin/ConfirmDialog";
+
 
 function AdminProducts() {
     const addProduct = useAddProduct();
@@ -25,18 +28,12 @@ function AdminProducts() {
 
     const [showForm, setShowForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [selectedProductId, setSelectedProductId] = useState(null);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     // Fetch products from backend
-    const {
-        data: response,
-        isLoading: prodIsLoading,
-        error: prodError,
-    } = useGetAllProducts({
-        page: currentPage,
-        limit: 8,
-        search,
-        filter,
-    });
+    const { data: response, isLoading: prodIsLoading, error: prodError,
+    } = useGetAllProducts({ page: currentPage, limit: 8, search, filter, });
 
     const products = response?.data ?? [];
     const totalPage = response?.pagination?.totalPages ?? 1;
@@ -124,24 +121,33 @@ function AdminProducts() {
             return;
         }
 
-        if (
-            formData.rating === "" ||
-            formData.rating == null ||
-            !Number.isFinite(Number(formData.rating)) ||
-            Number(formData.rating) < 0 ||
-            Number(formData.rating) > 5
-        ) {
+        if (formData.rating !== "" && (!Number.isFinite(Number(formData.rating))
+            || Number(formData.rating) < 0 || Number(formData.rating) > 5)) {
+
             toast.error("Rating must be between 0 and 5");
             return;
         }
 
+        if (!formData.description?.trim()) {
+            toast.error("Product description is required");
+            return;
+        }
+
+        if (!formData.brand?.trim()) {
+            toast.error("Product brand is required");
+            return;
+        }
+
+
         const productData = {
             ...formData,
             title: formData.title.trim(),
+            description: formData.description.trim(),
             category: formData.category.trim(),
+            brand: formData.brand.trim(),
             price: Number(formData.price),
             stock: Number(formData.stock),
-            rating: Number(formData.rating),
+            rating: formData.rating === "" ? 0 : Number(formData.rating),
         };
 
         // Edit existing product
@@ -173,220 +179,304 @@ function AdminProducts() {
     }
 
     // Delete product
-    function handleDelete(id) {
-        if (!window.confirm("Are you sure you want to delete this product?")) {
-            return;
-        }
 
-        deleteProduct.mutate(id);
+    function handleDelete(id) {
+        setSelectedProductId(id);
+        setIsConfirmOpen(true);
     }
+
+    function confirmDelete() {
+        if (!selectedProductId) return;
+
+        deleteProduct.mutate(selectedProductId, {
+            onSettled: () => {
+                setIsConfirmOpen(false);
+                setSelectedProductId(null);
+            },
+        });
+    }
+
+    function cancelDelete() {
+        setIsConfirmOpen(false);
+        setSelectedProductId(null);
+    }
+
 
     const isSaving =
         addProduct.isPending || updateProduct.isPending;
 
+
     return (
-        <div className="flex w-full min-h-screen bg-[#0F1420]">
+        <div className="min-h-screen w-full overflow-x-clip bg-[#0F1420] text-white">
             <SideBar />
 
-            <main className="ml-64 bg-[#0F1420] min-h-screen w-full">
+            <main className="min-h-screen min-w-0 w-full md:ml-64 md:w-[calc(100%-16rem)]">
                 <Header
-                    page="products"
-                    content="Dashboard/Products"
+                    page="Products"
+                    content="Dashboard / Products"
                 />
 
-                <div className="overflow-x-auto">
-                    {/* Search, filter, and add button */}
-                    <div className="flex flex-wrap justify-end items-center pr-5 gap-3 border-b-2 border-white/10 py-3">
-                        <input
-                            type="search"
-                            placeholder="Search products..."
-                            name="search"
-                            className="py-2 px-3 text-white rounded border border-white/20 bg-transparent outline-none focus:border-indigo-500"
-                            value={search}
-                            onChange={handleSearch}
-                        />
+                <div className="min-w-0 space-y-5 p-3 sm:p-5 lg:p-6">
 
-                        <div className="relative flex items-center">
-                            <CiFilter className="absolute left-3 z-10 text-white pointer-events-none" />
-
-                            <select
-                                className="pl-9 pr-4 py-2 border border-white/20 rounded-md text-white bg-[#0F1420]"
-                                value={filter}
-                                onChange={handleFilter}
-                            >
-                                <option value="">Sort products</option>
-                                <option value="low-high">
-                                    Price: Low to High
-                                </option>
-                                <option value="high-low">
-                                    Price: High to Low
-                                </option>
-                                <option value="rating">
-                                    Rating: Highest
-                                </option>
-                                <option value="stock">
-                                    Stock: Highest
-                                </option>
-                            </select>
+                    {/* Page heading */}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h2 className="text-xl font-bold sm:text-2xl">
+                                Product Management
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-400">
+                                Manage your inventory, pricing and product details.
+                            </p>
                         </div>
 
                         <button
                             type="button"
                             onClick={handleAddProduct}
-                            className="bg-white text-zinc-700 font-bold text-sm px-4 py-2 rounded hover:bg-indigo-600 hover:text-white transition"
+                            className="inline-flex min-h-10 w-fit items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
                         >
-                            + Add Product
+                            <span className="text-lg leading-none">+</span>
+                            Add Product
                         </button>
                     </div>
 
-                    {/* Add / edit form */}
+                    {/* Search and filter */}
+                    <section className="rounded-2xl border border-white/[0.07] bg-[#111827] p-3 sm:p-4">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(200px,1fr)_190px]">
+                            <input
+                                type="search"
+                                name="search"
+                                placeholder="Search products..."
+                                aria-label="Search products"
+                                value={search}
+                                onChange={handleSearch}
+                                className="h-10 min-w-0 rounded-lg border border-white/10 bg-[#0F1420] px-3 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                            />
+
+                            <div className="relative min-w-0">
+                                <CiFilter className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl text-slate-400" />
+
+                                <select
+                                    value={filter}
+                                    onChange={handleFilter}
+                                    aria-label="Sort products"
+                                    className="h-10 w-full appearance-none rounded-lg border border-white/10 bg-[#0F1420] pl-9 pr-3 text-sm text-white outline-none transition focus:border-indigo-500"
+                                >
+                                    <option value="">Sort products</option>
+                                    <option value="low-high">Price: Low to High</option>
+                                    <option value="high-low">Price: High to Low</option>
+                                    <option value="rating">Rating: Highest</option>
+                                    <option value="stock">Stock: Highest</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Add / edit product form */}
                     {showForm && (
-                        <ProductForm
-                            product={editingProduct}
-                            onClose={handleCloseForm}
-                            onSubmit={handleProductSubmit}
-                            isSubmitting={isSaving}
-                        />
+                        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 p-3 backdrop-blur-sm sm:p-6">
+                            <div className="relative max-h-[90dvh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/10 bg-[#111827] shadow-2xl">
+
+                                {/* Modal header */}
+                                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#111827] px-4 py-4 sm:px-6">
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-white sm:text-xl">
+                                            {editingProduct ? "Edit Product" : "Add New Product"}
+                                        </h2>
+                                        <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+                                            Enter your product details below.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleCloseForm}
+                                        disabled={isSaving}
+                                        aria-label="Close product form"
+                                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xl text-slate-400 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+                                    >
+                                        &times;
+                                    </button>
+                                </div>
+
+                                {/* Form content */}
+                                <div className="p-2 sm:p-4">
+                                    <ProductForm
+                                        product={editingProduct}
+                                        onClose={handleCloseForm}
+                                        onSubmit={handleProductSubmit}
+                                        isSubmitting={isSaving}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     )}
 
                     {/* Products table */}
-                    <table className="w-full min-w-[800px] text-white">
-                        <thead>
-                            <tr className="border-b border-white/10 text-zinc-400">
-                                <th className="text-left p-3">ID</th>
-                                <th className="text-left p-3">Product</th>
-                                <th className="text-left p-3">Category</th>
-                                <th className="text-left p-3">Price</th>
-                                <th className="text-left p-3">Stock</th>
-                                <th className="text-left p-3">Rating</th>
-                                <th className="text-left p-3">Actions</th>
-                            </tr>
-                        </thead>
+                    <section className="min-w-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-[#111827]">
 
-                        <tbody>
-                            {products.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="text-center py-10 text-zinc-400"
-                                    >
-                                        No products found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                products.map((item, index) => (
-                                    <tr
-                                        key={item._id}
-                                        className="border-b border-white/5 hover:bg-white/5"
-                                    >
-                                        <td className="p-3">
-                                            {(currentPage - 1) * 8 +
-                                                index +
-                                                1}
-                                        </td>
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.07] px-4 py-4 sm:px-5">
+                            <h3 className="font-semibold">All Products</h3>
+                            <span className="text-xs text-slate-400 sm:text-sm">
+                                {products.length} products on this page
+                            </span>
+                        </div>
 
-                                        <td className="p-3">
-                                            <div className="flex items-center gap-3">
-                                                <img
-                                                    src={
-                                                        item.thumbnail ||
-                                                        item.images?.[0]
-                                                    }
-                                                    alt={item.title}
-                                                    className="w-10 h-10 object-contain bg-white rounded"
-                                                />
-                                                <span>{item.title}</span>
-                                            </div>
-                                        </td>
+                        <div className="w-full overflow-x-auto">
+                            <table className="w-full min-w-[760px] text-left text-sm">
 
-                                        <td className="p-3 capitalize">
-                                            {item.category?.replace("-", " ")}
-                                        </td>
-
-                                        <td className="p-3">
-                                            ${Number(item.price).toFixed(2)}
-                                        </td>
-
-                                        <td className="p-3">
-                                            <span
-                                                className={
-                                                    item.stock <= 10
-                                                        ? "text-red-400"
-                                                        : "text-green-400"
-                                                }
-                                            >
-                                                {item.stock}
-                                            </span>
-                                        </td>
-
-                                        <td className="p-3">
-                                            ⭐ {item.rating}
-                                        </td>
-
-                                        <td className="p-3">
-                                            <div className="flex gap-4 items-center">
-                                                <button
-                                                    type="button"
-                                                    title="Edit product"
-                                                    onClick={() =>
-                                                        handleEditProduct(item)
-                                                    }
-                                                    className="text-xl text-indigo-400 hover:text-indigo-300"
-                                                >
-                                                    <MdOutlineModeEdit />
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    title="Delete product"
-                                                    disabled={deleteProduct.isPending}
-                                                    onClick={() =>
-                                                        handleDelete(item._id)
-                                                    }
-                                                    className="text-xl text-red-400 hover:text-red-300 disabled:opacity-50"
-                                                >
-                                                    <RiDeleteBin6Line />
-                                                </button>
-                                            </div>
-                                        </td>
+                                <thead>
+                                    <tr className="border-b border-white/[0.07] text-xs uppercase tracking-wider text-slate-500">
+                                        <th className="px-5 py-4 font-medium">ID</th>
+                                        <th className="px-5 py-4 font-medium">Product</th>
+                                        <th className="px-5 py-4 font-medium">Category</th>
+                                        <th className="px-5 py-4 font-medium">Price</th>
+                                        <th className="px-5 py-4 font-medium">Stock</th>
+                                        <th className="px-5 py-4 font-medium">Rating</th>
+                                        <th className="px-5 py-4 font-medium">Actions</th>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                </thead>
 
-                    {/* Pagination */}
-                    <div className="flex justify-end items-center gap-3 p-4 text-white">
-                        <button
-                            type="button"
-                            disabled={currentPage <= 1}
-                            onClick={() =>
-                                setCurrentPage((prev) => prev - 1)
-                            }
-                            className="px-3 py-2 bg-white text-indigo-900 rounded disabled:opacity-40"
-                        >
-                            Previous
-                        </button>
+                                <tbody className="divide-y divide-white/[0.05]">
+                                    {products.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={7} className="px-5 py-14 text-center">
+                                                <p className="text-slate-300">No products found</p>
+                                                <p className="mt-1 text-sm text-slate-500">
+                                                    Try another search or add a new product.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        products.map((item, index) => (
+                                            <tr
+                                                key={item._id}
+                                                className="transition-colors hover:bg-white/[0.025]"
+                                            >
+                                                <td className="px-5 py-4 text-slate-400">
+                                                    {(currentPage - 1) * 8 + index + 1}
+                                                </td>
 
-                        <span>
-                            Page {currentPage} of {totalPage}
-                        </span>
+                                                <td className="px-5 py-4">
+                                                    <div className="flex min-w-0 items-center gap-3">
+                                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white p-1.5">
+                                                            <img
+                                                                src={item.thumbnail || item.images?.[0]}
+                                                                alt={item.title}
+                                                                loading="lazy"
+                                                                className="h-full w-full object-contain"
+                                                            />
+                                                        </div>
 
-                        <button
-                            type="button"
-                            disabled={currentPage >= totalPage}
-                            onClick={() =>
-                                setCurrentPage((prev) => prev + 1)
-                            }
-                            className="px-3 py-2 bg-white text-indigo-900 rounded disabled:opacity-40"
-                        >
-                            Next
-                        </button>
-                    </div>
+                                                        <span className="max-w-[220px] truncate font-medium text-slate-200">
+                                                            {item.title}
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-5 py-4 capitalize text-slate-400">
+                                                    {item.category?.replace("-", " ")}
+                                                </td>
+
+                                                <td className="whitespace-nowrap px-5 py-4 font-medium text-slate-200">
+                                                    ${Number(item.price).toFixed(2)}
+                                                </td>
+
+                                                <td className="px-5 py-4">
+                                                    <span
+                                                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${item.stock <= 10
+                                                            ? "bg-red-500/10 text-red-400"
+                                                            : "bg-emerald-500/10 text-emerald-400"
+                                                            }`}
+                                                    >
+                                                        {item.stock} in stock
+                                                    </span>
+                                                </td>
+
+                                                <td className="whitespace-nowrap px-5 py-4 text-slate-300">
+                                                    <span className="text-amber-400">★</span>{" "}
+                                                    {item.rating ?? 0}
+                                                </td>
+
+                                                <td className="px-5 py-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            title="Edit product"
+                                                            aria-label={`Edit ${item.title}`}
+                                                            onClick={() => handleEditProduct(item)}
+                                                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-400/20 bg-indigo-500/10 text-lg text-indigo-300 transition hover:bg-indigo-500/20"
+                                                        >
+                                                            <MdOutlineModeEdit />
+                                                        </button>
+
+                                                        <button
+                                                            type="button"
+                                                            title="Move to Trash"
+                                                            aria-label={`Move ${item.title} to trash`}
+                                                            disabled={deleteProduct.isPending}
+                                                            onClick={() => handleDelete(item._id)}
+                                                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-400/20 bg-red-500/10 text-lg text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
+                                                        >
+                                                            <RiDeleteBin6Line />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex flex-col gap-4 border-t border-white/[0.07] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+
+                            <p className="text-sm text-slate-400">
+                                Page {currentPage} of {Math.max(totalPage, 1)}
+                            </p>
+
+                            <div className="flex items-center justify-between gap-3 sm:justify-end">
+                                <button
+                                    type="button"
+                                    disabled={currentPage <= 1}
+                                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                                    className="min-h-10 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm font-medium text-slate-200 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    Previous
+                                </button>
+
+                                <span className="whitespace-nowrap text-xs text-slate-400 sm:text-sm">
+                                    {currentPage} / {Math.max(totalPage, 1)}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    disabled={currentPage >= totalPage}
+                                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                                    className="min-h-10 rounded-lg border border-indigo-500/30 bg-indigo-600 px-3 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </main>
+
+            {/* Delete confirmation dialog */}
+            <ConfirmDialog
+                open={isConfirmOpen}
+                title="Move product to Trash?"
+                description="You can restore this product later."
+                confirmText="Move to Trash"
+                notConfirmText="Cancel"
+                confirmButtonClass="bg-indigo-600 hover:bg-indigo-500 focus:ring-indigo-400"
+                onConfirm={confirmDelete}
+                onCancel={cancelDelete}
+            />
         </div>
     );
+
 }
 
 export default AdminProducts;

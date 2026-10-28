@@ -1,6 +1,5 @@
 
-import { PieChart, Pie, Cell, ResponsiveContainer, } from "recharts";
-
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const categoryConfig = [
     {
@@ -29,74 +28,83 @@ const categoryConfig = [
     },
 ];
 
-
-
-
 const CategoryChart = ({ products = [] }) => {
+    // Supports both an array and an API response containing data.
+    const productList = Array.isArray(products)
+        ? products
+        : Array.isArray(products?.data)
+        ? products.data
+        : [];
 
-    const categoryData = categoryConfig.map((category) => ({ ...category, value: products?.data.filter(
-            (product) => product.category === category.category).length,}));
-
-            console.log(categoryData)
+    const categoryData = categoryConfig.map((category) => ({
+        ...category,
+        value: productList.filter(
+            (product) => product.category === category.category
+        ).length,
+    }));
 
     return (
-        <div className="bg-[#111827] text-white backdrop-blur-md p-5 rounded-xl">
-            <h2 className="text-xl font-semibold mb-5">
+        <div className="w-full min-w-0 rounded-xl border border-white/5 bg-[#111827] p-4 text-white sm:p-5">
+            <h2 className="mb-4 text-lg font-semibold sm:mb-5 sm:text-xl">
                 Products by Category
             </h2>
 
-            <div className="flex items-center gap-6">
-
-                {/* Donut */}
-                <div className="w-1/2 h-62.5 relative">
-
+            <div className="grid min-w-0 grid-cols-1 items-center gap-4 sm:gap-5 xl:grid-cols-2">
+                {/* Donut chart */}
+                <div className="relative mx-auto h-56 w-full min-w-0 max-w-[280px] sm:h-64 xl:h-56">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-
-                            <Pie   data={categoryData} dataKey="value" nameKey="name" innerRadius={60}
-                                outerRadius={90} paddingAngle={2}>
-                                {categoryData.map((item, index) => (
-                                    <Cell key={index} fill={item.chartColor} />
+                            <Pie
+                                data={categoryData}
+                                dataKey="value"
+                                nameKey="name"
+                                innerRadius="55%"
+                                outerRadius="78%"
+                                paddingAngle={2}
+                            >
+                                {categoryData.map((item) => (
+                                    <Cell
+                                        key={item.category}
+                                        fill={item.chartColor}
+                                    />
                                 ))}
                             </Pie>
-
-                        </PieChart  >
+                        </PieChart>
                     </ResponsiveContainer>
 
-                    {/* Center text */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    {/* Center total */}
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                         <span className="text-2xl font-bold">
-                            {products.length}
+                            {productList.length}
                         </span>
-
-                        <span className="text-gray-400">
+                        <span className="text-sm text-gray-400">
                             Total
                         </span>
                     </div>
-
                 </div>
 
-                {/* Category list */}
-                <div className="flex-1 space-y-4">
-
-                    {
-                        categoryData.map((category) => (
-                            <div key={category.name} className="flex items-center justify-between" >
-                                <div className="flex items-center gap-2">
-
-                                    <span className={`w-3 h-3 rounded-full ${category.color}`} ></span>
-
-                                    <span>{category.name}</span>
-
-                                </div>
-
-                                <span>{category.value}</span>
+                {/* Category legend */}
+                <div className="min-w-0 space-y-4">
+                    {categoryData.map((category) => (
+                        <div
+                            key={category.category}
+                            className="flex min-w-0 items-center justify-between gap-3 text-sm sm:text-base"
+                        >
+                            <div className="flex min-w-0 items-center gap-2">
+                                <span
+                                    className={`h-3 w-3 shrink-0 rounded-full ${category.color}`}
+                                />
+                                <span className="truncate">
+                                    {category.name}
+                                </span>
                             </div>
-                        ))
-                    }
 
+                            <span className="shrink-0 font-medium tabular-nums">
+                                {category.value}
+                            </span>
+                        </div>
+                    ))}
                 </div>
-
             </div>
         </div>
     );

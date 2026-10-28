@@ -6,79 +6,109 @@ import RevenueChart from "../../Components/Admin/RevenueChart";
 import StatCard from "../../Components/Admin/StatCard";
 import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
 import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
-import useGetDashboardUsers from "../../hooks/Admin/useGetDashboardUsers";
 import useGetUsers from "../../hooks/Admin/useGetUsers";
 
-
-
-
 function Dashboard() {
-    let limit = 1000
-    const { data: users, isLoading, error } = useGetUsers({limit})
-    const { data: products, isLoading: prodIsLoading, error: prodError } = useGetAllProducts({limit})
-    const { data: orders, isLoading: orderIsLoading, error: orderError } = useGetAllOrders();
+    const limit = 1000;
 
-    if (isLoading) {
-        return <h1>loading..</h1>
+    const {
+        data: users,
+        isLoading,
+        error,
+    } = useGetUsers({ limit });
+
+    const {
+        data: products,
+        isLoading: prodIsLoading,
+        error: prodError,
+    } = useGetAllProducts({ limit });
+
+    const {
+        data: orders,
+        isLoading: orderIsLoading,
+        error: orderError,
+    } = useGetAllOrders({ limit });
+
+    const allOrders = orders?.data || [];
+
+    const totalPrice = Math.ceil(
+        allOrders.reduce(
+            (sum, order) =>
+                sum + Number(order?.totalAmount || 0),
+            0
+        )
+    );
+
+    if (isLoading || prodIsLoading || orderIsLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-[#0F1420] px-4 text-white">
+                <p className="text-sm sm:text-base">
+                    Loading dashboard...
+                </p>
+            </div>
+        );
     }
 
-    if (error) {
-        return <h1>error</h1>
+    if (error || prodError || orderError) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-[#0F1420] px-4 text-red-400">
+                <p className="text-sm sm:text-base">
+                    Failed to load dashboard data. Please try again.
+                </p>
+            </div>
+        );
     }
-
-    if (prodIsLoading) {
-        return <h1>loading..</h1>
-    }
-
-    if (prodError) {
-        return <h1>error</h1>
-    }
-    if (orderIsLoading) {
-        return <h1>loading..</h1>
-    }
-
-    if (orderError) {
-        return <h1>error</h1>
-    }
-
-    const allOrders = orders || [];
-
-    const totalPrice = Math.ceil(allOrders.reduce((sum, order) => sum + Number(order?.totalAmount || 0),0));
-
-    console.log(totalPrice , "price" , allOrders?.length, "length")
-
-
 
     return (
-        <>
-            <div className=" flex w-full bg-[#0F1420]">
+        <div className="min-h-screen w-full overflow-x-clip bg-[#0F1420] text-white">
+            <SideBar />
 
-                <SideBar />
+            <main
+                className="
+                    min-h-screen min-w-0 w-full
+                    px-0
+                    md:ml-64 md:w-[calc(100%-16rem)]
+                "
+            >
+                <Header
+                    page="Dashboard"
+                    content="Welcome back, "
+                    role=" Admin"
+                />
 
-                <main className="min-h-screen ml-64  bg-[#0F1420] w-full" >
+                <section className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-5 lg:px-6">
+                    <StatCard
+                        users={users?.data}
+                        allOrders={allOrders}
+                        totalPrice={totalPrice}
+                        products={products}
+                    />
+                </section>
 
-                    <Header page={"Dashboard"} content={"Wellcome back, "} role={" Admin"} />
-
-                    <StatCard users={users?.data} allOrders={allOrders}  totalPrice={totalPrice}  products={products} />
-                    <div className="flex gap-5 w-full p-5">
-
-                        <div className="w-2/3">
+                <section
+                    className="
+                        grid w-full min-w-0
+                        grid-cols-1 gap-4
+                        px-3 pb-5
+                        sm:gap-5 sm:px-5
+                        lg:grid-cols-3 lg:px-6
+                    "
+                >
+                    <div className="min-w-0 lg:col-span-2">
+                        <div className="h-full min-w-0 overflow-hidden rounded-xl">
                             <RevenueChart allOrders={allOrders} />
                         </div>
-
-                        <div className="w-1/3">
-                            <CategoryChart products={products} />
-                        </div>
-
                     </div>
 
-
-
-
-                </main>
-            </div>
-        </>
-    )
+                    <div className="min-w-0">
+                        <div className="h-full min-w-0 overflow-hidden rounded-xl">
+                            <CategoryChart products={products} />
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    );
 }
-export default Dashboard;
 
+export default Dashboard;

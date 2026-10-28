@@ -1,87 +1,46 @@
+
 import { useNavigate, useParams } from "react-router-dom";
 import useProductById from "../hooks/useProductById";
-
-import {
-    FaStar,
-    FaTruck,
-    FaShieldAlt,
-} from "react-icons/fa";
-
+import { FaStar, FaTruck, FaShieldAlt } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
 
 import Footer from "../Components/Footer";
 import AddToCartButton from "../Components/AddToCartButton";
 import Header from "../Components/Header";
 
-
 function ProductDetails() {
-
     const navigate = useNavigate();
     const { id } = useParams();
 
-    const {
-        data,
-        isLoading,
-        error
-    } = useProductById(id);
-
-
-    // -----------------------------
-    // Loading
-    // -----------------------------
+    const { data, isLoading, error } = useProductById(id);
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#0B0B0F] flex items-center justify-center">
-                <h1 className="text-white text-2xl font-bold">
+            <div className="flex min-h-screen items-center justify-center bg-[#0B0B0F] px-4 text-center">
+                <h1 className="text-xl font-bold text-white sm:text-2xl">
                     Loading Product...
                 </h1>
             </div>
         );
     }
 
-
-    // -----------------------------
-    // Error
-    // -----------------------------
-
     if (error || !data) {
         return (
-            <div className="min-h-screen bg-[#0B0B0F] flex items-center justify-center">
-                <h1 className="text-red-500 text-2xl">
+            <div className="flex min-h-screen items-center justify-center bg-[#0B0B0F] px-4 text-center">
+                <h1 className="text-xl text-red-400 sm:text-2xl">
                     Something went wrong...
                 </h1>
             </div>
         );
     }
 
-
-    // -----------------------------
-    // Safe product values
-    // -----------------------------
-
     const price = Number(data?.price || 0);
+    const discount = Number(data?.discountPercentage || 0);
+    const rating = Number(data?.rating || 0);
+    const stock = Number(data?.stock || 0);
 
-    const discount = Number(
-        data?.discountPercentage || 0
-    );
-
-    const rating = Number(
-        data?.rating || 0
-    );
-
-    const stock = Number(
-        data?.stock || 0
-    );
-
-
-    const discountAmount =
-        price * (discount / 100);
-
-
-    const finalPrice =
-        price - discountAmount;
-
+    const discountAmount = price * (discount / 100);
+    const finalPrice = price - discountAmount;
 
     const image =
         data?.images?.[2] ||
@@ -89,185 +48,85 @@ function ProductDetails() {
         data?.images?.[0] ||
         data?.thumbnail;
 
-
-    const brand =
-        data?.brand ||
-        data?.category ||
-        "Product";
-
-
+    const brand = data?.brand || data?.category || "Product";
     const description =
-        data?.description ||
-        "No description available for this product.";
-
+        data?.description || "No description available for this product.";
 
     return (
         <>
-            <div className="min-h-screen bg-[#0B0B0F] text-white">
-
+            <div className="min-h-screen w-full overflow-x-clip bg-[#0B0B0F] text-white">
                 <Header />
 
-
-                {/* =========================
-                    Breadcrumb
-                ========================== */}
-
-                <div className="max-w-7xl mx-auto pt-28 px-6">
-
-                    <p className="text-zinc-400 text-sm">
-
-                        Home /
-
-                        <span className="mx-2 capitalize">
-                            {data?.category}
+                {/* Breadcrumb */}
+                <div className="mx-auto w-full max-w-7xl px-4 pt-28 sm:px-6">
+                    <p className="break-words text-xs leading-6 text-zinc-400 sm:text-sm">
+                        <span
+                            onClick={() => navigate("/")}
+                            className="cursor-pointer hover:text-white"
+                        >
+                            Home
                         </span>
-
-                        /
-
-                        <span className="text-white">
-                            {data?.title}
-                        </span>
-
+                        <span className="mx-2">/</span>
+                        <span className="capitalize">{data?.category}</span>
+                        <span className="mx-2">/</span>
+                        <span className="text-white">{data?.title}</span>
                     </p>
-
                 </div>
 
+                {/* Main Product Section */}
+                <section className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
+                    <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-10">
 
-                {/* =========================
-                    Main Product Section
-                ========================== */}
-
-                <section className="max-w-7xl mx-auto px-6 py-10">
-
-                    <div className="grid lg:grid-cols-2 gap-10">
-
-
-                        {/* =========================
-                            Product Image
-                        ========================== */}
-
-                        <div
-                            className="
-                            bg-[#191A20]
-                            rounded-3xl
-                            border border-white/10
-                            p-6
-                            flex
-                            flex-col
-                            items-center
-                            relative
-                            "
-                        >
-
-                            {/* Discount Badge */}
-
+                        {/* Product Image and About */}
+                        <div className="flex min-w-0 flex-col items-center rounded-2xl border border-white/10 bg-[#191A20] p-4 sm:rounded-3xl sm:p-6">
                             {discount > 0 && (
-                                <div
-                                    className="
-                                    absolute
-                                    top-5
-                                    left-5
-                                    bg-red-500
-                                    text-white
-                                    px-3
-                                    py-1.5
-                                    rounded-lg
-                                    text-sm
-                                    font-semibold
-                                    "
-                                >
+                                <div className="relative z-10 mb-3 self-start rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white sm:text-sm">
                                     {discount.toFixed(0)}% OFF
                                 </div>
                             )}
 
-
-                            {/* Product Image */}
-
-                            <div className="h-[450px] w-full flex items-center justify-center">
-
-                                <img
-                                    src={image}
-                                    alt={data?.title}
-                                    className="
-                                    w-full
-                                    max-w-md
-                                    h-[400px]
-                                    object-contain
-                                    transition
-                                    duration-300
-                                    hover:scale-105
-                                    "
-                                />
-
+                            <div className="flex h-[280px] w-full min-w-0 items-center justify-center sm:h-[380px] lg:h-[450px]">
+                                {image ? (
+                                    <img
+                                        src={image}
+                                        alt={data?.title || "Product"}
+                                        className="h-full w-full max-w-md object-contain transition duration-300 hover:scale-105"
+                                    />
+                                ) : (
+                                    <p className="text-sm text-zinc-500">
+                                        Image unavailable
+                                    </p>
+                                )}
                             </div>
 
-
-                            {/* About Product */}
-
-                            <div className="w-full mt-4">
-
-                                <h2 className="text-2xl font-bold mb-3">
+                            <div className="mt-5 w-full">
+                                <h2 className="mb-3 text-xl font-bold sm:text-2xl">
                                     About this Product
                                 </h2>
-
-                                <p className="text-zinc-400 leading-7">
+                                <p className="break-words text-sm leading-7 text-zinc-400 sm:text-base">
                                     {description}
                                 </p>
-
                             </div>
-
                         </div>
 
-
-                        {/* =========================
-                            Product Information
-                        ========================== */}
-
-                        <div className="flex flex-col gap-6">
-
-
-                            {/* Product Header */}
-
-                            <div>
-
-                                <span
-                                    className="
-                                    inline-block
-                                    bg-indigo-600
-                                    px-4
-                                    py-1
-                                    rounded-full
-                                    text-sm
-                                    "
-                                >
+                        {/* Product Information */}
+                        <div className="flex min-w-0 flex-col gap-5 sm:gap-6">
+                            <div className="min-w-0">
+                                <span className="inline-block max-w-full break-words rounded-full bg-indigo-600 px-4 py-1 text-sm">
                                     {brand}
                                 </span>
 
-
-                                <h1 className="text-3xl lg:text-4xl font-bold mt-4">
+                                <h1 className="mt-4 break-words text-2xl font-bold sm:text-3xl lg:text-4xl">
                                     {data?.title}
                                 </h1>
 
-
-                                {/* Rating + Stock */}
-
-                                <div className="flex items-center gap-3 mt-4">
-
+                                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm sm:text-base">
                                     <div className="flex items-center gap-1">
-
-                                        <FaStar className="text-yellow-400" />
-
-                                        <span>
-                                            {rating.toFixed(1)}
-                                        </span>
-
+                                        <FaStar className="shrink-0 text-yellow-400" />
+                                        <span>{rating.toFixed(1)}</span>
                                     </div>
 
-
-                                    <span className="text-zinc-600">
-                                        |
-                                    </span>
-
+                                    <span className="text-zinc-600">|</span>
 
                                     <span
                                         className={
@@ -278,333 +137,153 @@ function ProductDetails() {
                                     >
                                         {stock > 0
                                             ? `In Stock (${stock})`
-                                            : "Out of Stock"
-                                        }
+                                            : "Out of Stock"}
                                     </span>
-
                                 </div>
-
                             </div>
 
-
-                            {/* Description */}
-
-                            <p className="text-zinc-300 leading-7">
+                            <p className="break-words text-sm leading-7 text-zinc-300 sm:text-base">
                                 {description}
                             </p>
 
-
-                            {/* =========================
-                                Price Card
-                            ========================== */}
-
-                            <div
-                                className="
-                                bg-[#191A20]
-                                rounded-2xl
-                                border border-white/10
-                                p-6
-                                flex
-                                flex-col
-                                gap-5
-                                "
-                            >
-
-                                {/* Price */}
-
-                                <div className="flex items-center gap-4 flex-wrap">
-
-                                    <h2 className="text-4xl font-bold text-indigo-400">
+                            {/* Price Card */}
+                            <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-white/10 bg-[#191A20] p-4 sm:p-6">
+                                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                                    <h2 className="text-3xl font-bold text-indigo-400 sm:text-4xl">
                                         ${finalPrice.toFixed(2)}
                                     </h2>
 
-
                                     {discount > 0 && (
                                         <>
-                                            <del className="text-zinc-500">
+                                            <del className="text-sm text-zinc-500 sm:text-base">
                                                 ${price.toFixed(2)}
                                             </del>
 
-                                            <span
-                                                className="
-                                                bg-green-600
-                                                px-3
-                                                py-1
-                                                rounded-full
-                                                text-sm
-                                                "
-                                            >
+                                            <span className="rounded-full bg-green-600 px-3 py-1 text-xs sm:text-sm">
                                                 Save ${discountAmount.toFixed(2)}
                                             </span>
                                         </>
                                     )}
-
                                 </div>
 
-
                                 {/* Features */}
-
-                                <div className="flex flex-wrap gap-5 text-sm text-zinc-300">
-
+                                <div className="flex flex-col gap-3 text-sm text-zinc-300 min-[400px]:flex-row min-[400px]:flex-wrap min-[400px]:gap-4">
                                     <div className="flex items-center gap-2">
-                                        <FaTruck className="text-green-400" />
+                                        <FaTruck className="shrink-0 text-green-400" />
                                         Free Shipping
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <FaShieldAlt className="text-blue-400" />
+                                        <FaShieldAlt className="shrink-0 text-blue-400" />
                                         Secure Payment
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <MdVerified className="text-indigo-400" />
+                                        <MdVerified className="shrink-0 text-indigo-400" />
                                         Genuine Product
                                     </div>
-
                                 </div>
 
-
-                                {/* Buttons */}
-
-                                <div className="flex gap-3 mt-2">
-
+                                {/* Purchase Buttons */}
+                                <div className="mt-2 flex min-w-0 flex-col gap-3 min-[400px]:flex-row">
                                     <div
-                                        className="flex-1"
+                                        className="w-full min-w-0 flex-1"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <AddToCartButton product={data} />
                                     </div>
 
-
                                     <button
                                         onClick={() => navigate("/checkout")}
                                         disabled={stock <= 0}
-                                        className="
-                                        bg-orange-500
-                                        hover:bg-orange-600
-                                        disabled:bg-zinc-700
-                                        disabled:cursor-not-allowed
-                                        transition
-                                        rounded-xl
-                                        px-7
-                                        py-3
-                                        font-semibold
-                                        "
+                                        className="w-full rounded-xl bg-orange-500 px-4 py-3 font-semibold transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-zinc-700 min-[400px]:w-auto min-[400px]:shrink-0 min-[400px]:px-7"
                                     >
                                         Buy Now
                                     </button>
-
                                 </div>
-
                             </div>
 
-
-                            {/* =========================
-                                Specifications
-                            ========================== */}
-
-                            <div
-                                className="
-                                bg-[#191A20]
-                                border border-white/10
-                                rounded-2xl
-                                p-6
-                                "
-                            >
-
-                                <h2 className="text-2xl font-bold mb-5">
+                            {/* Product Specifications */}
+                            <div className="min-w-0 rounded-2xl border border-white/10 bg-[#191A20] p-4 sm:p-6">
+                                <h2 className="mb-5 text-xl font-bold sm:text-2xl">
                                     Product Specifications
                                 </h2>
 
+                                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-x-3 gap-y-4 text-xs sm:text-sm">
+                                    <p className="text-zinc-500">Brand</p>
+                                    <p className="break-words">{brand}</p>
 
-                                <div className="grid grid-cols-2 gap-y-4 text-sm">
-
-
-                                    <p className="text-zinc-500">
-                                        Brand
-                                    </p>
-
-                                    <p>
-                                        {brand}
-                                    </p>
-
-
-                                    <p className="text-zinc-500">
-                                        Category
-                                    </p>
-
-                                    <p className="capitalize">
+                                    <p className="text-zinc-500">Category</p>
+                                    <p className="break-words capitalize">
                                         {data?.category || "N/A"}
                                     </p>
 
-
-                                    <p className="text-zinc-500">
-                                        Availability
-                                    </p>
-
+                                    <p className="text-zinc-500">Availability</p>
                                     <p
                                         className={
                                             stock > 0
-                                                ? "text-green-400"
-                                                : "text-red-400"
+                                                ? "break-words text-green-400"
+                                                : "break-words text-red-400"
                                         }
                                     >
                                         {stock > 0
                                             ? `In Stock (${stock})`
-                                            : "Out of Stock"
-                                        }
+                                            : "Out of Stock"}
                                     </p>
 
-
-                                    <p className="text-zinc-500">
-                                        Rating
-                                    </p>
-
+                                    <p className="text-zinc-500">Rating</p>
                                     <p className="flex items-center gap-2">
-
                                         {rating.toFixed(1)}
-
-                                        <FaStar className="text-yellow-400" />
-
+                                        <FaStar className="shrink-0 text-yellow-400" />
                                     </p>
 
+                                    <p className="text-zinc-500">Discount</p>
+                                    <p>{discount.toFixed(0)}%</p>
 
-                                    <p className="text-zinc-500">
-                                        Discount
-                                    </p>
-
-                                    <p>
-                                        {discount.toFixed(0)}%
-                                    </p>
-
-
-                                    <p className="text-zinc-500">
-                                        Shipping
-                                    </p>
-
-                                    <p className="text-green-400">
+                                    <p className="text-zinc-500">Shipping</p>
+                                    <p className="break-words text-green-400">
                                         {data?.shippingInformation || "Free Shipping"}
                                     </p>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </section>
 
-
-                {/* =========================
-                    Why Buy
-                ========================== */}
-
-                <section className="max-w-7xl mx-auto px-6 pb-12">
-
-                    <div className="grid md:grid-cols-3 gap-5">
-
-
-                        {/* Fast Delivery */}
-
-                        <div
-                            className="
-                            bg-[#191A20]
-                            border border-white/10
-                            rounded-2xl
-                            p-6
-                            text-center
-                            "
-                        >
-
-                            <FaTruck
-                                className="
-                                text-4xl
-                                text-green-400
-                                mx-auto
-                                mb-4
-                                "
-                            />
-
-                            <h3 className="font-semibold text-xl mb-2">
+                {/* Why Buy */}
+                <section className="mx-auto w-full max-w-7xl px-4 pb-10 sm:px-6 sm:pb-12">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
+                        <div className="rounded-2xl border border-white/10 bg-[#191A20] p-5 text-center sm:p-6">
+                            <FaTruck className="mx-auto mb-4 text-4xl text-green-400" />
+                            <h3 className="mb-2 text-lg font-semibold sm:text-xl">
                                 Fast Delivery
                             </h3>
-
-                            <p className="text-zinc-400">
+                            <p className="text-sm text-zinc-400 sm:text-base">
                                 Free delivery on all eligible orders.
                             </p>
-
                         </div>
 
-
-                        {/* Secure Payments */}
-
-                        <div
-                            className="
-                            bg-[#191A20]
-                            border border-white/10
-                            rounded-2xl
-                            p-6
-                            text-center
-                            "
-                        >
-
-                            <FaShieldAlt
-                                className="
-                                text-4xl
-                                text-blue-400
-                                mx-auto
-                                mb-4
-                                "
-                            />
-
-                            <h3 className="font-semibold text-xl mb-2">
+                        <div className="rounded-2xl border border-white/10 bg-[#191A20] p-5 text-center sm:p-6">
+                            <FaShieldAlt className="mx-auto mb-4 text-4xl text-blue-400" />
+                            <h3 className="mb-2 text-lg font-semibold sm:text-xl">
                                 Secure Payments
                             </h3>
-
-                            <p className="text-zinc-400">
+                            <p className="text-sm text-zinc-400 sm:text-base">
                                 Safe and encrypted payment methods.
                             </p>
-
                         </div>
 
-
-                        {/* Genuine Products */}
-
-                        <div
-                            className="
-                            bg-[#191A20]
-                            border border-white/10
-                            rounded-2xl
-                            p-6
-                            text-center
-                            "
-                        >
-
-                            <MdVerified
-                                className="
-                                text-4xl
-                                text-indigo-500
-                                mx-auto
-                                mb-4
-                                "
-                            />
-
-                            <h3 className="font-semibold text-xl mb-2">
+                        <div className="rounded-2xl border border-white/10 bg-[#191A20] p-5 text-center sm:col-span-2 sm:p-6 md:col-span-1">
+                            <MdVerified className="mx-auto mb-4 text-4xl text-indigo-500" />
+                            <h3 className="mb-2 text-lg font-semibold sm:text-xl">
                                 Genuine Products
                             </h3>
-
-                            <p className="text-zinc-400">
+                            <p className="text-sm text-zinc-400 sm:text-base">
                                 100% original products with manufacturer warranty.
                             </p>
-
                         </div>
-
                     </div>
-
                 </section>
-
             </div>
 
             <Footer />

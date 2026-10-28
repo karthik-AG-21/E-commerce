@@ -247,7 +247,7 @@ function Products() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0B0B0F] text-white">
+            <div className="flex min-h-[60vh] w-full items-center justify-center bg-[#0B0B0F] px-4 text-center text-white">
                 Loading...
             </div>
         );
@@ -261,11 +261,11 @@ function Products() {
         );
     }
 
-    
+
 
     return (
         <>
-            <div className="bg-[#0B0B0F] min-h-screen">
+            <div className="min-h-screen w-full overflow-x-clip bg-[#0B0B0F]">
                 <Header />
 
                 <ProductsHero />
@@ -290,27 +290,32 @@ function Products() {
                 )}
 
                 {/* Pagination */}
+
+                {/* Responsive Pagination */}
                 {pagination && pagination.totalPages > 0 && (
-                    <div className="flex justify-center items-center gap-4 py-10 text-white">
+                    <div className="flex w-full flex-wrap items-center justify-center gap-3 px-4 py-8 text-white sm:gap-4 sm:py-10">
                         <button
                             disabled={!pagination.hasPrevPage}
                             onClick={() => setPage((p) => p - 1)}
-                            className="px-4 py-2 border  bg-white text-black border-gray-600 rounded disabled:opacity-40">
-                            Previous</button>
+                            className="rounded-lg border border-gray-600 bg-white px-3 py-2 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4"
+                        >
+                            Previous
+                        </button>
 
-                        <span>
-                            Page {pagination.currentPage} of{" "}
-                            {pagination.totalPages}
+                        <span className="text-center text-sm text-gray-300 sm:text-base">
+                            Page {pagination.currentPage} of {pagination.totalPages}
                         </span>
 
                         <button
                             disabled={!pagination.hasNextPage}
                             onClick={() => setPage((p) => p + 1)}
-                            className="px-4 py-2 border bg-white text-black border-gray-600 rounded disabled:opacity-40">
+                            className="rounded-lg border border-gray-600 bg-white px-3 py-2 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4"
+                        >
                             Next
                         </button>
                     </div>
                 )}
+
             </div>
 
             <WhyChooseUs />

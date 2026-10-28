@@ -74,8 +74,8 @@ export const getAllUsers = async (req, res) => {
 
 export const blockUser = async (req, res) => {
     try {
-        
-        const { userId , status } = req.body;
+
+        const { userId, status } = req.body;
 
         if (typeof status !== "boolean") {
             return res.status(400).json({
@@ -117,7 +117,7 @@ export const getAllProducts = async (req, res) => {
         const search = req.query.search || "";
         const filter = req.query.filter || "";
 
-        const query = {};
+        const query = { isDeleted: { $ne: true }, };
 
         if (search) {
             query.$or = [
@@ -162,37 +162,248 @@ export const getAllProducts = async (req, res) => {
     }
 };
 
-
 export const createProduct = async (req, res) => {
     try {
-        const { title, category, price, stock, rating, image } = req.body;
+        const sku = `PROD-${Date.now()}`;
 
-        if (!title?.trim() || !category?.trim()) {
+        const { title, description, category, price, stock,
+            rating, brand, thumbnail, images } = req.body;
+
+        // Validate required fields
+        if (!title?.trim() || !description?.trim() || !category?.trim() || !brand?.trim() || !sku?.trim()) {
             return res.status(400).json({
                 success: false,
-                message: "Product title and category are required",
+                message: "Title, description, category, brand, and SKU are required",
             });
         }
 
-        if (price == null || Number(price) <= 0) {
+
+        if (price == null ||
+            !Number.isFinite(Number(price)) ||
+            Number(price) <= 0
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Price must be greater than 0",
             });
         }
 
+        // Validate stock
+        if (
+            stock == null ||
+            !Number.isFinite(Number(stock)) ||
+            Number(stock) < 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Stock must be zero or greater",
+            });
+        }
+
+
+
+        // Create product
         const product = await Product.create({
             title: title.trim(),
+            description: description.trim(),
             category: category.trim(),
             price: Number(price),
-            stock: Number(stock ?? 0),
+            stock: Number(stock),
             rating: Number(rating ?? 0),
-            image,
+            brand: brand.trim(),
+            sku: sku,
+            thumbnail,
+            images: images ?? [],
         });
 
         return res.status(201).json({
             success: true,
             message: "Product created successfully",
+            data: product,
+        });
+    } catch (error) {
+        console.error("Create product error:", error);
+
+
+
+        // Mongoose validation
+        if (error.name === "ValidationError") {
+            return res.status(400).json({
+                success: false,
+                message: error.message,
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+};
+
+
+
+
+export const updateProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const {
+            title,
+            description,
+            category,
+            brand,
+            price,
+            stock,
+            rating,
+            thumbnail,
+            images,
+        } = req.body;
+
+        // Validate product ID
+        if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid product ID",
+            });
+        }
+
+        // Check whether product exists
+        const existingProduct = await Product.findById(id);
+
+        if (!existingProduct) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        // Validate required fields
+        if (
+            !title?.trim() ||
+            !description?.trim() ||
+            !category?.trim() ||
+            !brand?.trim()
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Title, description, category and brand are required",
+            });
+        }
+
+        // Validate price
+        if (
+            price === undefined ||
+            price === null ||
+            price === "" ||
+            !Number.isFinite(Number(price)) ||
+            Number(price) <= 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Price must be greater than 0",
+            });
+        }
+
+        // Validate stock
+        if (
+            stock === undefined ||
+            stock === null ||
+            stock === "" ||
+            !Number.isInteger(Number(stock)) ||
+            Number(stock) < 0
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Stock must be a non-negative integer",
+            });
+        }
+
+        // Validate rating
+        if (
+            rating !== undefined &&
+            (
+                !Number.isFinite(Number(rating)) ||
+                Number(rating) < 0 ||
+                Number(rating) > 5
+            )
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Rating must be between 0 and 5",
+            });
+        }
+
+        // Build the update object
+        const updateData = {
+            title: title.trim(),
+            description: description.trim(),
+            category: category.trim(),
+            brand: brand.trim(),
+            price: Number(price),
+            stock: Number(stock),
+        };
+
+        if (rating !== undefined) {
+            updateData.rating = Number(rating);
+        }
+
+        if (thumbnail !== undefined) {
+            updateData.thumbnail = thumbnail;
+        }
+
+        if (images !== undefined) {
+            updateData.images = images;
+        }
+
+        // Update product
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+            data: updatedProduct,
+        });
+    } catch (error) {
+        console.error("Update product error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update product",
+            error: error.message,
+        });
+    }
+};
+
+
+
+export const softDeleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const product = await Product.findByIdAndUpdate(
+            id,
+            { $set: { isDeleted: true } },
+            { new: true, runValidators: true }
+        );
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Product moved to trash successfully",
             data: product,
         });
     } catch (error) {
@@ -204,23 +415,34 @@ export const createProduct = async (req, res) => {
     }
 };
 
-export const updateProduct = async (req, res) => {
+
+
+export const getTrashProducts = async (req, res) => {
     try {
-        const { id } = req.params;
+        const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+        const limit = Math.max(1, Number.parseInt(req.query.limit, 10) || 8);
+        const skip = (page - 1) * limit;
 
-        const product = await Product.findByIdAndUpdate(id,{ $set: req.body },{returnDocument: "after", runValidators: true,});
+        const query = { isDeleted: true };
 
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found",
-            });
-        }
+        const [products, totalProducts] = await Promise.all([
+            Product.find(query)
+                .sort({ updatedAt: -1 })
+                .skip(skip)
+                .limit(limit),
+
+            Product.countDocuments(query),
+        ]);
 
         return res.status(200).json({
             success: true,
-            message: "Product updated successfully",
-            data: product,
+            data: products,
+            pagination: {
+                currentPage: page,
+                totalProducts,
+                totalPages: Math.ceil(totalProducts / limit),
+                limit,
+            },
         });
     } catch (error) {
         return res.status(500).json({
@@ -229,24 +451,207 @@ export const updateProduct = async (req, res) => {
         });
     }
 };
-
-export const getAllOrders = async (req, res) => {
+export const restoreTrashProducts = async (req, res) => {
     try {
-        const orders = await Order.find();
+        const { id } = req.params;
+
+        const product = await Product.findByIdAndUpdate(
+            id,
+            { isDeleted: false },
+            { returnDocument: true }
+        );
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
 
         res.status(200).json({
             success: true,
-            data: orders,
-            message: "orders fetched successfully"
+            message: "Product restored successfully",
+            product
         });
-    } catch (error) {
-        console.error("GET ALL ORDERS ERROR:", error);
 
+    } catch (error) {
+        console.log(error);
         res.status(500).json({
             success: false,
-            message: error.message,
+            message: "Internal server error"
         });
     }
 };
 
 
+export const DeleteProduct = async (req, res) => {
+    try {
+
+        const { id } = req.params;
+
+        const product = await Product.findByIdAndDelete(id)
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product is not found" })
+        }
+
+        res.status(200).json({ success: true, message: "product deleted successfull" })
+
+    } catch (error) {
+        console.log(error)
+
+        res.status(500).json({ success: false, message: "Internal server error" })
+    }
+}
+
+
+export const getAllOrders = async (req, res) => {
+    try {
+        // Support both GET query params and POST body params
+        const params = {
+            ...req.query,
+            ...req.body,
+        };
+
+        const page = Math.max(1, parseInt(params.page, 10) || 1);
+        const limit = Math.min(
+            100,
+            Math.max(1, parseInt(params.limit, 10) || 8)
+        );
+
+        const search = String(params.search || "").trim();
+        const filter = String(params.filter || "");
+
+        // Map frontend sorting options to database fields
+        const sortOptions = {
+            newest: { orderedAt: -1, _id: -1 },
+            oldest: { orderedAt: 1, _id: 1 },
+            "low-high": { totalAmount: 1, _id: 1 },
+            "high-low": { totalAmount: -1, _id: -1 },
+        };
+
+        // Optional status filter
+        const allowedStatuses = [
+            "Pending",
+            "Processing",
+            "Shipped",
+            "Delivered",
+            "Cancelled",
+        ];
+
+        const query = {};
+
+        if (allowedStatuses.includes(filter)) {
+            query.status = filter;
+        }
+
+        // Default order: newest first
+        const sort = sortOptions[filter] || sortOptions.newest;
+
+        // Search by order ID, customer name, payment method, or status
+        if (search) {
+            const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+            const regex = new RegExp(escapedSearch, "i");
+
+            query.$or = [
+                { id: regex },
+                { "address.name": regex },
+                { paymentMethod: regex },
+                { status: regex },
+            ];
+        }
+
+        const skip = (page - 1) * limit;
+
+        const [orders, totalOrders] = await Promise.all([
+            Order.find(query)
+                .sort(sort)
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+
+            Order.countDocuments(query),
+        ]);
+
+        const totalPages = Math.ceil(totalOrders / limit);
+
+        return res.status(200).json({
+            success: true,
+            message: "Orders fetched successfully",
+            data: orders,
+            pagination: {
+                currentPage: page,
+                limit,
+                totalOrders,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPrevPage: page > 1,
+            },
+        });
+    } catch (error) {
+        console.error("GET ALL ORDERS ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch orders",
+        });
+    }
+};
+
+
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { userId, orderId } = req.params;
+        const { status } = req.body;
+
+        const validStatuses = [
+            "Pending",
+            "Processing",
+            "Shipped",
+            "Delivered",
+            "Cancelled",
+        ];
+
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid order status",
+            });
+        }
+
+        const order = await Order.findOneAndUpdate(
+            {
+                _id: orderId,
+                user: userId,
+            },
+            {
+                $set: { status: status.toLowerCase() },
+            },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Order status updated successfully",
+            data: order,
+        });
+    } catch (error) {
+        console.error("UPDATE ORDER STATUS ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update order status",
+        });
+    }
+};

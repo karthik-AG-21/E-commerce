@@ -1,44 +1,83 @@
 
-import { IoSearch } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
-const user = JSON.parse(localStorage.getItem("user"))
-const name = user?.name?.split("")[0]?.toUpperCase()
-
-function Header({page,content,role , }) {
+function Header({ page, content, role }) {
     const navigate = useNavigate();
 
+    let name = "";
+
+    try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        name = user?.name?.trim()?.charAt(0)?.toUpperCase() || "A";
+    } catch {
+        name = "A";
+    }
+
     return (
-        <>
-            <div className="items-center px-6 py-3 border-b-2 border-white/10 flex justify-between  relative bg-">
-                <div>
-                    <h1 className="font-bold text-3xl text-white" >{page}</h1>
-                    <p onClick={()=>navigate("/Dashboard")} className="px-1 text-indigo-300 cursor-pointer 
-                    hover:border-b-2 border-blue-600">{content}<span className="text-white">{role}</span></p>
-                </div>
+        <header
+            className="
+                relative flex w-full min-w-0
+                items-center justify-between gap-3
+                border-b border-white/10
+                bg-[#0F1420]
+                px-3 py-4 pl-16
+                sm:px-5 sm:py-4 sm:pl-16
+                lg:px-6 lg:pl-6
+            "
+        >
+            {/* Page title and breadcrumb */}
+            <div className="min-w-0 flex-1">
+                <h1
+                    className="
+                        truncate text-xl font-bold text-white
+                        sm:text-2xl
+                        lg:text-3xl
+                    "
+                >
+                    {page}
+                </h1>
 
-                <div className="flex gap-6 justify-center items-center" >
-                    {/* <div>
-                        <input type="search" name="search" placeholder="Search..."
-                            className="relative text-white rounded py-1 px-2 border-white border" />
-                        <IoSearch className="absolute text-white text-xl top-8 right-50" />
-                    </div> */}
-                    <div className="flex gap-2 justify-center items-center">
-                        <div>
-                            <div className="bg-blue-700 w-10 h-10 rounded-full flex justify-center items-center">
-                                <h1 className="text-white">{name}</h1>
-                            </div>
-                        </div>
-                        <div>
-                            <h1 className="font-bold text-xl text-white">Admin</h1>
-                            <p className="text-white">administrator</p>
-                        </div>
-                    </div>
-                </div>
-
+                <p
+                    onClick={() => navigate("/Dashboard")}
+                    className="
+                        mt-1 w-fit max-w-full cursor-pointer
+                        truncate text-xs text-indigo-300
+                        transition-colors hover:text-indigo-200
+                        sm:text-sm
+                    "
+                >
+                    {content}
+                    <span className="text-white">{role}</span>
+                </p>
             </div>
-        </>
-    )
+
+            {/* Admin profile */}
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                <div
+                    className="
+                        flex h-9 w-9 shrink-0 items-center
+                        justify-center rounded-full
+                        bg-blue-700
+                        sm:h-10 sm:w-10
+                    "
+                >
+                    <span className="text-sm font-semibold text-white sm:text-base">
+                        {name}
+                    </span>
+                </div>
+
+                <div className="min-w-0">
+                    <h2 className="truncate text-sm font-bold text-white sm:text-base lg:text-xl">
+                        Admin
+                    </h2>
+
+                    <p className="hidden text-xs text-gray-400 sm:block sm:text-sm">
+                        Administrator
+                    </p>
+                </div>
+            </div>
+        </header>
+    );
 }
 
 export default Header;

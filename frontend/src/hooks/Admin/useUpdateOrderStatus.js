@@ -1,20 +1,19 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import updateOrderStatus from "../../service/Admin/updateOrderStatus";
 
-
-function useUpdateOrderStatus(){
-
-    const queryClient  = useQueryClient();
+const useUpdateOrderStatus = () => {
+    const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn:updateOrderStatus,
+        mutationFn: updateOrderStatus,
 
-        onSuccess:()=>{
+        onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey:["users"]
-            })
+                queryKey: ["orders"],
+            });
         },
-    })
-}
+    });
+};
 
 export default useUpdateOrderStatus;

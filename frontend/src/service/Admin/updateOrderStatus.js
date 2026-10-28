@@ -1,19 +1,11 @@
-import axios from "axios"
 
+import api from "../../api/api";
 
-async function updateOrderStatus({userId, orderId ,status}){
-
-    const  response = await axios.get(`http://localhost:3000/users/${userId}`);
-
-    const user = response.data;
-
-    const order = user?.orders?.find((order) => order.id === orderId);
-
-    order.status = status;
-
-    const res = await axios.patch( `http://localhost:3000/users/${userId}`,{ orders: user.orders });
+async function updateOrderStatus({ userId, orderId, status }) {
+    
+    const res = await api.patch(`/admin/orders/${userId}/${orderId}`, { status });
 
     return res.data;
 }
 
-export default updateOrderStatus
+export default updateOrderStatus;

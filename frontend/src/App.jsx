@@ -25,6 +25,7 @@ import AdminOrders from "./Pages/Admin/Orders"
 import AdminProducts from "./Pages/Admin/Products"
 import Profile from "./Pages/Profile"
 import ChangePassword from "./Pages/ChangePassword"
+import AdminTrash from "./Pages/Admin/Trash"
 
 
 
@@ -62,6 +63,7 @@ function App() {
           <Route path="/Dashboard" element={<AdminRoute><Dashboard/></AdminRoute>}/>
           <Route path="/Dashboard/Admin-users" element={<AdminRoute><AdminUsers /></AdminRoute>}/>
           <Route path="/Dashboard/Admin-orders" element={<AdminRoute><AdminOrders /></AdminRoute>}/>
+          <Route path="/Dashboard/Admin-trash" element={<AdminRoute><AdminTrash /></AdminRoute>}/>
           <Route path="/Dashboard/Admin-products" element={<AdminRoute><AdminProducts/></AdminRoute>}/>
 
           

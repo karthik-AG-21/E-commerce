@@ -1,21 +1,43 @@
-import { useState } from "react";
 
-function ProductForm({ product, onClose, onSubmit }) {
+import { useState, useEffect } from "react";
 
+function ProductForm({
+    product,
+    onClose,
+    onSubmit,
+    isSubmitting = false,
+}) {
     const [formData, setFormData] = useState({
-        title: product?.title || "",
-        category: product?.category || "",
-        price: product?.price || "",
-        stock: product?.stock || "",
-        rating: product?.rating || "",
-        thumbnail: product?.thumbnail || "",
+        title: "",
+        description: "",
+        category: "",
+        brand: "",
+        price: "",
+        stock: "",
+        rating: "",
+        thumbnail: "",
     });
 
-    function handleChange(e) {
+    useEffect(() => {
         setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
+            title: product?.title ?? "",
+            description: product?.description ?? "",
+            category: product?.category ?? "",
+            brand: product?.brand ?? "",
+            price: product?.price ?? "",
+            stock: product?.stock ?? "",
+            rating: product?.rating ?? "",
+            thumbnail: product?.thumbnail ?? "",
         });
+    }, [product]);
+
+    function handleChange(e) {
+        const { name, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
     }
 
     function handleSubmit(e) {
@@ -23,137 +45,234 @@ function ProductForm({ product, onClose, onSubmit }) {
         onSubmit(formData);
     }
 
+    const inputClass = `
+        block w-full min-w-0 rounded-xl
+        border border-white/10 bg-[#0F1420]
+        px-3 py-3 text-base text-white
+        placeholder:text-zinc-500
+        outline-none transition-colors
+        focus:border-indigo-500
+        focus:ring-2 focus:ring-indigo-500/20
+        sm:px-4
+    `;
+
+    const labelClass =
+        "mb-2 block text-sm font-medium text-zinc-300";
+
     return (
-    <div className="p-5">
-        <form
-            onSubmit={handleSubmit}
-            className="bg-[#161C2A] border border-white/10 rounded-lg p-6 max-w-4xl mx-auto shadow-lg"
-        >
-            <h2 className="text-xl font-semibold text-white mb-6">
-                {product ? "Edit Product" : "Add New Product"}
-            </h2>
+        <div className="w-full min-w-0 p-3 sm:p-5">
+            <form
+                onSubmit={handleSubmit}
+                className="
+                    mx-auto w-full min-w-0 max-w-4xl
+                    rounded-2xl border border-white/10
+                    bg-[#161C2A]
+                    p-4 text-white shadow-lg
+                    sm:p-6 lg:p-8
+                "
+            >
+                <div className="mb-6">
+                    <h2 className="text-xl font-semibold sm:text-2xl">
+                        {product ? "Edit Product" : "Add New Product"}
+                    </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                {/* Product Name */}
-                <div>
-                    <label className="block text-sm text-zinc-300 mb-2">
-                        Product Name
-                    </label>
-
-                    <input
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        placeholder="Enter product name"
-                        className="w-full px-3 py-2 rounded-md bg-[#0F1420] border border-white/10 text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
-                    />
+                    <p className="mt-1 text-sm text-zinc-400">
+                        {product
+                            ? "Update the product details below."
+                            : "Enter the details to add a new product."}
+                    </p>
                 </div>
 
-                {/* Category */}
-                <div>
-                    <label className="block text-sm text-zinc-300 mb-2">
-                        Category
-                    </label>
+                <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
+                    {/* Product Name */}
+                    <div className="min-w-0">
+                        <label htmlFor="title" className={labelClass}>
+                            Product Name
+                        </label>
+                        <input
+                            id="title"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            placeholder="Enter product name"
+                            className={inputClass}
+                            autoComplete="off"
+                            required
+                        />
+                    </div>
 
-                    <input
-                        name="category"
-                        value={formData.category}
-                        onChange={handleChange}
-                        placeholder="Enter category"
-                        className="w-full px-3 py-2 rounded-md bg-[#0F1420] border border-white/10 text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
-                    />
+                    {/* Description */}
+                    <div className="min-w-0">
+                        <label htmlFor="description" className={labelClass}>
+                            Description
+                        </label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            placeholder="Enter product description"
+                            className={`${inputClass} min-h-28 resize-y`}
+                            rows={3}
+                            required
+                        />
+                    </div>
+
+                    {/* Category */}
+                    <div className="min-w-0">
+                        <label htmlFor="category" className={labelClass}>
+                            Category
+                        </label>
+                        <input
+                            id="category"
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            placeholder="Enter category"
+                            className={inputClass}
+                            required
+                        />
+                    </div>
+
+                    {/* Brand */}
+                    <div className="min-w-0">
+                        <label htmlFor="brand" className={labelClass}>
+                            Brand
+                        </label>
+                        <input
+                            id="brand"
+                            name="brand"
+                            value={formData.brand}
+                            onChange={handleChange}
+                            placeholder="Enter brand"
+                            className={inputClass}
+                            required
+                        />
+                    </div>
+
+                    {/* Price */}
+                    <div className="min-w-0">
+                        <label htmlFor="price" className={labelClass}>
+                            Price
+                        </label>
+                        <input
+                            id="price"
+                            name="price"
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            inputMode="decimal"
+                            value={formData.price}
+                            onChange={handleChange}
+                            placeholder="Enter price"
+                            className={inputClass}
+                            required
+                        />
+                    </div>
+
+                    {/* Stock */}
+                    <div className="min-w-0">
+                        <label htmlFor="stock" className={labelClass}>
+                            Stock
+                        </label>
+                        <input
+                            id="stock"
+                            name="stock"
+                            type="number"
+                            min="0"
+                            step="1"
+                            inputMode="numeric"
+                            value={formData.stock}
+                            onChange={handleChange}
+                            placeholder="Enter stock quantity"
+                            className={inputClass}
+                            required
+                        />
+                    </div>
+
+                    {/* Rating */}
+                    <div className="min-w-0">
+                        <label htmlFor="rating" className={labelClass}>
+                            Rating
+                        </label>
+                        <input
+                            id="rating"
+                            name="rating"
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="5"
+                            inputMode="decimal"
+                            value={formData.rating}
+                            onChange={handleChange}
+                            placeholder="0 - 5"
+                            className={inputClass}
+                        />
+                    </div>
+
+                    {/* Thumbnail */}
+                    <div className="min-w-0 md:col-span-2">
+                        <label htmlFor="thumbnail" className={labelClass}>
+                            Image URL
+                        </label>
+                        <input
+                            id="thumbnail"
+                            name="thumbnail"
+                            type="url"
+                            value={formData.thumbnail}
+                            onChange={handleChange}
+                            placeholder="https://example.com/image.jpg"
+                            className={inputClass}
+                        />
+                    </div>
                 </div>
 
-                {/* Price */}
-                <div>
-                    <label className="block text-sm text-zinc-300 mb-2">
-                        Price
-                    </label>
+                {/* Actions */}
+                <div className="
+                    mt-7 flex flex-col-reverse gap-3
+                    border-t border-white/10 pt-5
+                    sm:flex-row sm:justify-end
+                ">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                        className="
+                            min-h-12 w-full rounded-xl
+                            bg-zinc-700 px-5 py-3
+                            text-sm font-semibold text-white
+                            transition-colors hover:bg-zinc-600
+                            disabled:cursor-not-allowed disabled:opacity-50
+                            sm:w-auto
+                        "
+                    >
+                        Cancel
+                    </button>
 
-                    <input
-                        name="price"
-                        type="number"
-                        value={formData.price}
-                        onChange={handleChange}
-                        placeholder="Enter price"
-                        className="w-full px-3 py-2 rounded-md bg-[#0F1420] border border-white/10 text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
-                    />
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="
+                            min-h-12 w-full rounded-xl
+                            bg-indigo-600 px-5 py-3
+                            text-sm font-semibold text-white
+                            transition-colors hover:bg-indigo-500
+                            focus-visible:outline-none
+                            focus-visible:ring-2 focus-visible:ring-indigo-400
+                            disabled:cursor-not-allowed disabled:opacity-50
+                            sm:w-auto
+                        "
+                    >
+                        {isSubmitting
+                            ? "Saving..."
+                            : product
+                                ? "Update Product"
+                                : "Add Product"}
+                    </button>
                 </div>
-
-                {/* Stock */}
-                <div>
-                    <label className="block text-sm text-zinc-300 mb-2">
-                        Stock
-                    </label>
-
-                    <input
-                        name="stock"
-                        type="number"
-                        value={formData.stock}
-                        onChange={handleChange}
-                        placeholder="Enter stock"
-                        className="w-full px-3 py-2 rounded-md bg-[#0F1420] border border-white/10 text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
-                    />
-                </div>
-
-                {/* Rating */}
-                <div>
-                    <label className="block text-sm text-zinc-300 mb-2">
-                        Rating
-                    </label>
-
-                    <input
-                        name="rating"
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="5"
-                        value={formData.rating}
-                        onChange={handleChange}
-                        placeholder="0 - 5"
-                        className="w-full px-3 py-2 rounded-md bg-[#0F1420] border border-white/10 text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
-                    />
-                </div>
-
-                {/* Image */}
-                <div>
-                    <label className="block text-sm text-zinc-300 mb-2">
-                        Image URL
-                    </label>
-
-                    <input
-                        name="thumbnail"
-                        value={formData.thumbnail}
-                        onChange={handleChange}
-                        placeholder="enter the url"
-                        className="w-full px-3 py-2 rounded-md bg-[#0F1420] border border-white/10
-                         text-white placeholder-zinc-500 outline-none focus:border-indigo-500"
-                    />
-                </div>
-
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 mt-7">
-
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-5 py-2 rounded-md bg-zinc-700 text-white hover:bg-zinc-600 transition">
-                    Cancel
-                </button>
-
-                <button
-                    type="submit"
-                    className="px-5 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition">
-                    {product ? "Update Product" : "Add Product"}
-                </button>
-
-            </div>
-        </form>
-    </div>
-);
+            </form>
+        </div>
+    );
 }
 
 export default ProductForm;
