@@ -24,7 +24,7 @@ app.use(helmet())
 
 // app.use(cors({ origin:[ "http://localhost:5173" , "http://172.16.1.129:5173",], credentials: true }))
 
-app.use(cors({ origin: [ "http://localhost:5173", " https://e-commerce-tau-one-23.vercel.app/" ], credentials: true }))
+app.use(cors({ origin: [ "http://localhost:5173", "https://e-commerce-tau-one-23.vercel.app/" ], credentials: true }))
 
 app.use(express.json());
 app.use(cookieParser());
@@ -93,5 +93,5 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT
 
 app.listen(PORT, () => {
-    console.log("server is running in http://localhost:8000");
+    console.log(`Server running on port ${PORT}`);
 })
