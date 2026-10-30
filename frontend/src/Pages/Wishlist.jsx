@@ -29,14 +29,16 @@ function Wishlist() {
     // Current page's products and pagination metadata
     const products = wishlistResponse?.items ?? [];
     const pagination = wishlistResponse?.pagination;
-    const wishlistProductIds = wishlistResponse?.wishlistProductIds ?? [];
+    
 
     // Keep Redux compatible with your existing wishlist buttons
     useEffect(() => {
+        const wishlistProductIds = wishlistResponse?.wishlistProductIds ?? [];
+
         if (Array.isArray(wishlistProductIds)) {
             dispatch(setWishlistProductIds(wishlistProductIds));
         }
-    }, [wishlistProductIds, dispatch]);
+    }, [wishlistResponse?.wishlistProductIds , dispatch]);
 
     const handleAddToCart = async (product) => {
         if (!product?._id) {

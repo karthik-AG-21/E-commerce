@@ -1,10 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import Home from "./Pages/Home"
-
-
-
-
-
 import Products from "./Pages/Products"
 import ProductDetails from "./Pages/ProductDetails"
 import Register from "./Pages/Register"
@@ -19,7 +14,6 @@ import OrderComplete from "./Pages/OrdersSuccess"
 import Orders from "./Pages/Order"
 import Dashboard from "./Pages/Admin/Dashboard"
 import AdminRoute from "./routes/AdminRoute"
-import Users from "./Pages/Admin/Users"
 import AdminUsers from "./Pages/Admin/Users"
 import AdminOrders from "./Pages/Admin/Orders"
 import AdminProducts from "./Pages/Admin/Products"

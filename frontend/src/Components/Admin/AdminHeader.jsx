@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 function Header({ page, content, role }) {
     const navigate = useNavigate();
 
-    let name = "";
+    let name;
 
     try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        name = user?.name?.trim()?.charAt(0)?.toUpperCase() || "A";
+        name = user?.name?.trim()?.charAt(0)?.toUpperCase() || "U";
     } catch {
         name = "A";
     }

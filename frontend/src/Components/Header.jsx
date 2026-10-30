@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CiUser } from "react-icons/ci";
 import { FaShoppingCart, FaRegHeart, FaBars, FaTimes } from "react-icons/fa";
@@ -27,8 +27,7 @@ function Header() {
     const wishlistCount = wishlistData?.pagination?.totalItems ?? 0;
     const cartCount = cartData?.pagination?.totalItems ?? 0;
 
-    const cartItems = useSelector((state) => state.cart.items ?? []);
-    const wishlistItems = useSelector((state) => state.wishlist.items ?? []);
+    
 
     useEffect(() => {
         if (!userId) {
@@ -48,9 +47,9 @@ function Header() {
     }, [userId, cartData, wishlistData, dispatch]);
 
     // Close mobile menu whenever the route changes
-    useEffect(() => {
-        setMenuOpen(false);
-    }, [location.pathname]);
+    // useEffect(() => {
+    //     setMenuOpen(false);
+    // }, [location.pathname]);
 
     const userData = (() => {
         try {

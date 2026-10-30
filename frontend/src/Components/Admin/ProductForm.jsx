@@ -1,36 +1,25 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-function ProductForm({
-    product,
-    onClose,
-    onSubmit,
-    isSubmitting = false,
-}) {
-    const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        category: "",
-        brand: "",
-        price: "",
-        stock: "",
-        rating: "",
-        thumbnail: "",
-    });
 
-    useEffect(() => {
-        setFormData({
-            title: product?.title ?? "",
-            description: product?.description ?? "",
-            category: product?.category ?? "",
-            brand: product?.brand ?? "",
-            price: product?.price ?? "",
-            stock: product?.stock ?? "",
-            rating: product?.rating ?? "",
-            thumbnail: product?.thumbnail ?? "",
-        });
-    }, [product]);
+ function getInitialFormData(product) {
+    return {
+        title: product?.title ?? "",
+        description: product?.description ?? "",
+        category: product?.category ?? "",
+        brand: product?.brand ?? "",
+        price: product?.price ?? "",
+        stock: product?.stock ?? "",
+        rating: product?.rating ?? "",
+        thumbnail: product?.thumbnail ?? "",
+    };
+}
 
+function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
+
+    const [formData, setFormData] = useState(() => getInitialFormData(product));
+
+   
     function handleChange(e) {
         const { name, value } = e.target;
 

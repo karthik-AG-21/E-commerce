@@ -3,7 +3,7 @@ import useAddToCart from "../hooks/Cart/useAddToCart";
 import { useSelector } from "react-redux";
 import useUpdateCart from "../hooks/Cart/useUpdateCart";
 import { useEffect } from "react";
-import { isPending } from "@reduxjs/toolkit";
+
 
 function AddToCartButton({ product }) {
     const { addProductToCart   } = useAddToCart();
@@ -18,7 +18,7 @@ function AddToCartButton({ product }) {
         if (cart.length > 0 && user) {
             mutate({ userId: user, cart: cart });
         }
-    }, [cart]);
+    }, [cart, user, mutate]);
 
 
     return (

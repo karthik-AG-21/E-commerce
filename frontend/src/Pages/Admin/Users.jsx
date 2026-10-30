@@ -15,8 +15,8 @@ function AdminUsers() {
 
     const itemsPerPage = 8;
 
-    const { data, isLoading, isError, error, isFetching } = useGetUsers
-        ({ page: currentPage, limit: itemsPerPage, search: debouncedSearch, filter, sort });
+    const { data, isLoading, isError, error, isFetching } = useGetUsers({
+         page: currentPage, limit: itemsPerPage, search: debouncedSearch, filter, sort });
 
     console.log("Full response:", data);
     console.log("Users array:", data?.data);

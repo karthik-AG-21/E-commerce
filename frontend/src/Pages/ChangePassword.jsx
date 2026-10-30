@@ -17,7 +17,7 @@ function ChangePassword() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const {mutate , isPending,  isSuccess, error: apiError} = useUpdatePassword();
+    const {mutate , isPending,  error: apiError} = useUpdatePassword();
 
     const handleSubmit = (e) => {
         e.preventDefault();

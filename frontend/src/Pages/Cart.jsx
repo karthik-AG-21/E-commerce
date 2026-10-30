@@ -1,5 +1,5 @@
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch,  } from "react-redux";
 import { removeCart, setCart } from "../redux/cartSlice";
 import useUpdateCart from "../hooks/Cart/useUpdateCart";
 import useGetCart from "../hooks/useGetCart";
