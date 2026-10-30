@@ -24,7 +24,7 @@ app.use(helmet())
 
 // app.use(cors({ origin:[ "http://localhost:5173" , "http://172.16.1.129:5173",], credentials: true }))
 
-app.use(cors({ origin: "http://localhost:5173" , credentials: true }))
+app.use(cors({ origin: [ "http://localhost:5173", " https://e-commerce-tau-one-23.vercel.app/" ], credentials: true }))
 
 app.use(express.json());
 app.use(cookieParser());
