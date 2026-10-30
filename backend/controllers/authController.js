@@ -2,6 +2,13 @@ import User from "../models/userSchema.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/"
+};
+
 export const register = async(req,res)=>{
     try{
         const {name , email , password } = req.body;
@@ -26,16 +33,12 @@ export const register = async(req,res)=>{
         const refreshToken = jwt.sign({id:user._id, role:user?.role}, process.env.REFRESH_TOKEN_SECRET, {expiresIn:"7d"});
 
         res.cookie("accessToken", token, {
-            httpOnly:true,
-            secure:process.env.NODE_ENV === "production",
-            sameSite:"lax",
+            ...cookieOptions,
             maxAge:15*60*1000
         });
 
         res.cookie("refreshToken", refreshToken, {
-            httpOnly:true,
-            secure:process.env.NODE_ENV === "production",
-            sameSite:"lax",
+            ...cookieOptions,
             maxAge:7*24*60*60*1000
         })
 
@@ -80,16 +83,12 @@ export const login = async(req,res)=>{
         const refreshToken = jwt.sign({id:user._id, role:user?.role}, process.env.REFRESH_TOKEN_SECRET, {expiresIn:"7d"});
 
         res.cookie("accessToken", token, {
-            httpOnly:true,
-            secure:process.env.NODE_ENV === "production",
-            sameSite:"lax",
+            ...cookieOptions,
             maxAge:15*60*1000
         });
 
         res.cookie("refreshToken", refreshToken, {
-            httpOnly:true,
-            secure:process.env.NODE_ENV === "production",
-            sameSite:"lax",
+            ...cookieOptions,
             maxAge:7*24*60*60*1000
         })
 
