@@ -3,10 +3,10 @@ import axios from "axios";
 
  const api = axios.create({ 
     baseURL: import.meta.env.VITE_API_BASE_URL,
-    // baseURL: "http://172.16.1.129:8000",
-    
     withCredentials: true
     });
+
+    // baseURL: "http://172.16.1.129:8000",
 
 
 
