@@ -2,23 +2,21 @@ import axios from "axios";
 
 
  const api = axios.create({ 
-    baseURL: "http://localhost:8000",
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    // baseURL: "http://172.16.1.129:8000",
+    
     withCredentials: true
     });
 
 
 
-api.interceptors.response.use(
-    (response) => response,
+api.interceptors.response.use((response) => response,
 
     async (error) => {
         const originalRequest = error.config;
 
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry &&
-            !originalRequest.url.includes("/auth/refresh")
-        ) {
+        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes("/auth/refresh")) {
+
             originalRequest._retry = true;
 
             try {

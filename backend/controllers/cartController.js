@@ -16,7 +16,8 @@ export const getCart = async (req, res) => {
 
         if (!cart || !cart.items?.length) {
             return res.status(200).json({
-                success: true, data: [],
+                success: true, 
+                data: [],
                 pagination: {
                     currentPage: page,
                     limit,

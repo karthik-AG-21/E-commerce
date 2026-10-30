@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 
 
@@ -21,7 +22,10 @@ function AdminRoute({children}){
     }
 
     if(user.role !== "admin"){
-        return <Navigate to="/login" replace />
+        toast.error("Admin access only");
+        return <Navigate to="/" replace />
+        
+        
     }
 
     

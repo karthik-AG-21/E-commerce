@@ -8,21 +8,13 @@ export const getWishlist = async (req, res) => {
     try {
         const userId = req.user.id;
 
-        const page = Math.max(
-            1,
-            parseInt(req.query.page, 10) || 1
-        );
+        const page = Math.max(1,parseInt(req.query.page, 10) || 1);
 
-        const limit = Math.max(
-            1,
-            parseInt(req.query.limit, 10) || 5
-        );
+        const limit = Math.max(1,parseInt(req.query.limit, 10) || 5);
 
         const skip = (page - 1) * limit;
 
-        const wishlist = await Wishlist.findOne({
-            user: userId,
-        }).populate("items.product");
+        const wishlist = await Wishlist.findOne({user: userId,}).populate("items.product");
 
         if (!wishlist) {
             return res.status(200).json({
@@ -44,24 +36,14 @@ export const getWishlist = async (req, res) => {
         const totalItems = wishlist.items.length;
         const totalPages = Math.ceil(totalItems / limit);
 
-        // All wishlist product IDs, across every page
-        const wishlistProductIds = wishlist.items
-            .map((item) => {
-                const product = item.product;
+        
+        const wishlistProductIds = wishlist.items.map((item) => {const product = item.product;
+                return product?._id ? String(product._id) : product ? String(product) : null;
+            }).filter(Boolean);
 
-                return product?._id
-                    ? String(product._id)
-                    : product
-                      ? String(product)
-                      : null;
-            })
-            .filter(Boolean);
-
-        // Only return products for the requested page
-        const paginatedItems = wishlist.items.slice(
-            skip,
-            skip + limit
-        );
+            console.log(wishlistProductIds, "ids")
+       
+        const paginatedItems = wishlist.items.slice(skip,skip + limit);
 
         return res.status(200).json({
             success: true,
@@ -108,15 +90,10 @@ export const addToWishlist = async (req, res) => {
 
         const normalizedProductId = String(productId);
 
-        let wishlist = await Wishlist.findOne({
-            user: userId,
-        });
+        let wishlist = await Wishlist.findOne({user: userId,});
 
         if (!wishlist) {
-            wishlist = await Wishlist.create({
-                user: userId,
-                items: [{ product: productId }],
-            });
+            wishlist = await Wishlist.create({user: userId , items: [{ product: productId }],});
 
             return res.status(201).json({
                 success: true,
@@ -125,11 +102,7 @@ export const addToWishlist = async (req, res) => {
             });
         }
 
-        const exists = wishlist.items.some(
-            (item) =>
-                String(item.product?._id ?? item.product) ===
-                normalizedProductId
-        );
+        const exists = wishlist.items.some((item) =>String(item.product?._id ?? item.product) === normalizedProductId);
 
         if (exists) {
             return res.status(409).json({
@@ -138,9 +111,7 @@ export const addToWishlist = async (req, res) => {
             });
         }
 
-        wishlist.items.push({
-            product: productId,
-        });
+        wishlist.items.push({product: productId,});
 
         await wishlist.save();
 
@@ -180,12 +151,8 @@ export const removeFromWishlist = async (req, res) => {
 
         const wishlist = await Wishlist.findOneAndUpdate(
             { user: userId },
-            {
-                $pull: {
-                    items: { product: productId },
-                },
-            },
-            { new: true }
+            {$pull: {items: { product: productId }, },},
+            { returnDocument: "after" }
         );
 
         if (!wishlist) {

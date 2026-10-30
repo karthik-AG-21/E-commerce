@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Order from "../models/orderSchema.js";
 import Product from "../models/productSchema.js";
 import User from "../models/userSchema.js";
@@ -35,7 +36,7 @@ export const getAllUsers = async (req, res) => {
         if (sort === "z-a") sortOption = { name: -1 };
         if (sort === "oldest-users") sortOption = { createdAt: 1 };
 
-        // Get users and count
+        
         const totalUsers = await User.countDocuments(query);
 
         const users = await User.find(query).select("-password").sort(sortOption).skip((page - 1) * limit).limit(limit);
@@ -85,7 +86,7 @@ export const blockUser = async (req, res) => {
         }
 
         const user = await User.findOneAndUpdate({ _id: userId, role: { $ne: "admin" }, }, { $set: { isBlocked: status }, },
-            { returnDocument: true, runValidators: true, }).select("-password");
+            { returnDocument: "after" , runValidators: true, }).select("-password");
 
         if (!user) {
             return res.status(404).json({
@@ -136,10 +137,7 @@ export const getAllProducts = async (req, res) => {
         const sortOption = sortOptions[filter] || { _id: -1 };
 
         const [products, totalProducts] = await Promise.all([
-            Product.find(query)
-                .sort(sortOption)
-                .skip((page - 1) * limit)
-                .limit(limit),
+            Product.find(query).sort(sortOption).skip((page - 1) * limit).limit(limit),
 
             Product.countDocuments(query),
         ]);
@@ -169,7 +167,7 @@ export const createProduct = async (req, res) => {
         const { title, description, category, price, stock,
             rating, brand, thumbnail, images } = req.body;
 
-        // Validate required fields
+        
         if (!title?.trim() || !description?.trim() || !category?.trim() || !brand?.trim() || !sku?.trim()) {
             return res.status(400).json({
                 success: false,
@@ -178,31 +176,21 @@ export const createProduct = async (req, res) => {
         }
 
 
-        if (price == null ||
-            !Number.isFinite(Number(price)) ||
-            Number(price) <= 0
-        ) {
+        if (price == null || !Number.isFinite(Number(price)) || Number(price) <= 0) {
             return res.status(400).json({
                 success: false,
                 message: "Price must be greater than 0",
             });
         }
 
-        // Validate stock
-        if (
-            stock == null ||
-            !Number.isFinite(Number(stock)) ||
-            Number(stock) < 0
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Stock must be zero or greater",
-            });
+        
+        if (stock == null || !Number.isFinite(Number(stock)) || Number(stock) < 0 ) {
+            return res.status(400).json({success: false, message: "Stock must be zero or greater", });
         }
 
 
 
-        // Create product
+        
         const product = await Product.create({
             title: title.trim(),
             description: description.trim(),
@@ -223,8 +211,6 @@ export const createProduct = async (req, res) => {
         });
     } catch (error) {
         console.error("Create product error:", error);
-
-
 
         // Mongoose validation
         if (error.name === "ValidationError") {
@@ -260,15 +246,12 @@ export const updateProduct = async (req, res) => {
             images,
         } = req.body;
 
-        // Validate product ID
-        if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid product ID",
-            });
+        
+        if (!id || !mongoose.isObjectIdOrHexString(id)) {
+            return res.status(400).json({success: false, message: "Invalid product ID",});
         }
 
-        // Check whether product exists
+        
         const existingProduct = await Product.findById(id);
 
         if (!existingProduct) {
@@ -278,63 +261,38 @@ export const updateProduct = async (req, res) => {
             });
         }
 
-        // Validate required fields
-        if (
-            !title?.trim() ||
-            !description?.trim() ||
-            !category?.trim() ||
-            !brand?.trim()
-        ) {
+        
+        if (!title?.trim() || !description?.trim() || !category?.trim() || !brand?.trim()) {
             return res.status(400).json({
                 success: false,
                 message: "Title, description, category and brand are required",
             });
         }
 
-        // Validate price
-        if (
-            price === undefined ||
-            price === null ||
-            price === "" ||
-            !Number.isFinite(Number(price)) ||
-            Number(price) <= 0
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Price must be greater than 0",
-            });
+        
+        if ( price === undefined || price === null || price === "" || !Number.isFinite(Number(price)) || Number(price) <= 0) {
+
+            return res.status(400).json({success: false, message: "Price must be greater than 0",});
         }
 
         // Validate stock
-        if (
-            stock === undefined ||
-            stock === null ||
-            stock === "" ||
-            !Number.isInteger(Number(stock)) ||
-            Number(stock) < 0
-        ) {
+        if (stock === undefined || stock === null || stock === "" || !Number.isInteger(Number(stock)) || Number(stock) < 0 ) {
+
             return res.status(400).json({
                 success: false,
                 message: "Stock must be a non-negative integer",
             });
         }
 
-        // Validate rating
-        if (
-            rating !== undefined &&
-            (
-                !Number.isFinite(Number(rating)) ||
-                Number(rating) < 0 ||
-                Number(rating) > 5
-            )
-        ) {
+        
+        if ( rating !== undefined &&(!Number.isFinite(Number(rating)) || Number(rating) < 0 || Number(rating) > 5 )) {
             return res.status(400).json({
                 success: false,
                 message: "Rating must be between 0 and 5",
             });
         }
 
-        // Build the update object
+        
         const updateData = {
             title: title.trim(),
             description: description.trim(),
@@ -356,21 +314,16 @@ export const updateProduct = async (req, res) => {
             updateData.images = images;
         }
 
-        // Update product
-        const updatedProduct = await Product.findByIdAndUpdate(
-            id,
+       
+        const updatedProduct = await Product.findByIdAndUpdate(id,
             { $set: updateData },
-            {
-                new: true,
-                runValidators: true,
-            }
-        );
+            { returnDocument: "after", runValidators: true });
 
         return res.status(200).json({
             success: true,
             message: "Product updated successfully",
-            data: updatedProduct,
-        });
+            data: updatedProduct,});
+
     } catch (error) {
         console.error("Update product error:", error);
 
@@ -391,21 +344,16 @@ export const softDeleteProduct = async (req, res) => {
         const product = await Product.findByIdAndUpdate(
             id,
             { $set: { isDeleted: true } },
-            { new: true, runValidators: true }
-        );
+            { returnDocument: "after", runValidators: true });
 
         if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found",
-            });
+            return res.status(404).json({success: false, message: "Product not found",});
         }
 
         return res.status(200).json({
-            success: true,
-            message: "Product moved to trash successfully",
-            data: product,
+            success: true, message: "Product moved to trash successfully", data: product,
         });
+
     } catch (error) {
         console.log(error)
         return res.status(500).json({
@@ -426,24 +374,19 @@ export const getTrashProducts = async (req, res) => {
         const query = { isDeleted: true };
 
         const [products, totalProducts] = await Promise.all([
-            Product.find(query)
-                .sort({ updatedAt: -1 })
-                .skip(skip)
-                .limit(limit),
+            Product.find(query).sort({ updatedAt: -1 }).skip(skip).limit(limit),
 
             Product.countDocuments(query),
         ]);
 
-        return res.status(200).json({
-            success: true,
-            data: products,
-            pagination: {
-                currentPage: page,
+        return res.status(200).json({success: true, data: products,
+            pagination: { 
+                currentPage: page, 
                 totalProducts,
-                totalPages: Math.ceil(totalProducts / limit),
-                limit,
-            },
-        });
+                 totalPages: Math.ceil(totalProducts / limit), 
+                 limit,
+                },});
+
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -458,28 +401,20 @@ export const restoreTrashProducts = async (req, res) => {
         const product = await Product.findByIdAndUpdate(
             id,
             { isDeleted: false },
-            { returnDocument: true }
+            { returnDocument: "after" }
         );
 
         if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            });
+            return res.status(404).json({success: false,message: "Product not found"});
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Product restored successfully",
-            product
-        });
+        res.status(200).json({success: true,message: "Product restored successfully",product});
 
     } catch (error) {
+
         console.log(error);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
+
+        res.status(500).json({success: false, message: "Internal server error"});
     }
 };
 
@@ -507,22 +442,16 @@ export const DeleteProduct = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
     try {
-        // Support both GET query params and POST body params
-        const params = {
-            ...req.query,
-            ...req.body,
-        };
+        
+        const params = {...req.query, ...req.body,};
 
         const page = Math.max(1, parseInt(params.page, 10) || 1);
-        const limit = Math.min(
-            100,
-            Math.max(1, parseInt(params.limit, 10) || 8)
-        );
+        const limit = Math.min(100,Math.max(1, parseInt(params.limit, 10) || 8));
 
         const search = String(params.search || "").trim();
-        const filter = String(params.filter || "");
+        const filter = String(params.filter || "").trim();
 
-        // Map frontend sorting options to database fields
+       
         const sortOptions = {
             newest: { orderedAt: -1, _id: -1 },
             oldest: { orderedAt: 1, _id: 1 },
@@ -530,7 +459,7 @@ export const getAllOrders = async (req, res) => {
             "high-low": { totalAmount: -1, _id: -1 },
         };
 
-        // Optional status filter
+        
         const allowedStatuses = [
             "Pending",
             "Processing",
@@ -545,10 +474,10 @@ export const getAllOrders = async (req, res) => {
             query.status = filter;
         }
 
-        // Default order: newest first
+        
         const sort = sortOptions[filter] || sortOptions.newest;
 
-        // Search by order ID, customer name, payment method, or status
+        
         if (search) {
             const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -565,11 +494,7 @@ export const getAllOrders = async (req, res) => {
         const skip = (page - 1) * limit;
 
         const [orders, totalOrders] = await Promise.all([
-            Order.find(query)
-                .sort(sort)
-                .skip(skip)
-                .limit(limit)
-                .lean(),
+            Order.find(query).sort(sort).skip(skip).limit(limit).lean(),
 
             Order.countDocuments(query),
         ]);
@@ -614,24 +539,14 @@ export const updateOrderStatus = async (req, res) => {
         ];
 
         if (!validStatuses.includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid order status",
-            });
+
+            return res.status(400).json({success: false, message: "Invalid order status" });
         }
 
         const order = await Order.findOneAndUpdate(
-            {
-                _id: orderId,
-                user: userId,
-            },
-            {
-                $set: { status: status.toLowerCase() },
-            },
-            {
-                new: true,
-                runValidators: true,
-            }
+            {_id: orderId,user: userId,},
+            {$set: { status: status.toLowerCase() },},
+            { returnDocuments: true,  runValidators: true  }
         );
 
         if (!order) {

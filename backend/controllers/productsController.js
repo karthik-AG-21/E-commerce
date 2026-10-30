@@ -1,7 +1,7 @@
 import Product from "../models/productSchema.js";
 
 
-// Escape user input before using it in a regular expression
+
 
 const escapeRegex = (value) =>value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -9,11 +9,11 @@ export const getProducts = async (req, res) => {
     try {
         const {search = "", category = "all",  brand = "all",sort = "newest", page = "1", limit = "12" } = req.query;
 
-        // 1. Validate pagination
+       
         const currentPage = Math.max(1, parseInt(page, 10) || 1);
         const pageSize = Math.min(50,Math.max(1, parseInt(limit, 10) || 12));
 
-        // 2. Build filters
+        
         const filter = {};
 
         if (category !== "all" && category.trim()) {
@@ -24,7 +24,7 @@ export const getProducts = async (req, res) => {
             filter.brand = {$regex: `^${escapeRegex(brand.trim())}$`,$options: "i",};
         }
 
-        // Search product name, brand, and description
+        
         if (search.trim()) {
             const searchRegex = {
                 $regex: escapeRegex(search.trim()),
