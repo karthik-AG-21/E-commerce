@@ -1,36 +1,54 @@
 import axios from "axios";
 
-
- const api = axios.create({ 
+const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true
-    });
+});
 
-    // baseURL: "http://172.16.1.129:8000",
+let refreshPromise = null;
 
-
-
-api.interceptors.response.use((response) => response,
+api.interceptors.response.use(
+    (response) => response,
 
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes("/auth/refresh")) {
+        if (!originalRequest) {
+            return Promise.reject(error);
+        }
 
+        const isRefreshRequest = originalRequest.url?.includes("/auth/refresh");
+
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !isRefreshRequest
+        ) {
             originalRequest._retry = true;
 
             try {
-                await api.post("/auth/refresh");
+                if (!refreshPromise) {
+                    refreshPromise = api.post("/auth/refresh")
+                        .finally(() => {
+                            refreshPromise = null;
+                        });
+                }
 
-                return await api(originalRequest);
+                await refreshPromise;
 
-            } catch (error) {
-                console.log("Refresh token expired");
-                throw error;
+                return api(originalRequest);
+
+            } catch (refreshError) {
+                localStorage.removeItem("user");
+                localStorage.removeItem("userId");
+
+                window.location.href = "/login";
+
+                return Promise.reject(refreshError);
             }
         }
 
-        throw error;
+        return Promise.reject(error);
     }
 );
 

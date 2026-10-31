@@ -1,28 +1,52 @@
 
+// import { Navigate } from "react-router-dom";
+// import { toast } from "react-toastify";
+
+// function AdminRoute({ children }) {
+
+//     let user;
+
+//     try {
+//         user = JSON.parse(localStorage.getItem("user"));
+//     } catch {
+//         user = null;
+//     }
+
+//     if (!user) {
+//         return <Navigate to="/login" replace />;
+//     }
+
+//     if (user.role !== "admin") {
+//         return <Navigate to="/" replace />;
+//     }
+
+//     return children;
+// }
+
+// export default AdminRoute;
+
 import { Navigate } from "react-router-dom";
-import { toast } from "react-toastify";
 
 function AdminRoute({ children }) {
-
-    let user;
+    let user = null;
 
     try {
-        user = JSON.parse(localStorage.getItem("user"));
+        const storedUser = localStorage.getItem("user");
+        user = storedUser ? JSON.parse(storedUser) : null;
     } catch {
         user = null;
     }
 
-    if (!user) {
-        toast.error("Please Login");
+    if (!user || typeof user !== "object" || !user.id) {
         return <Navigate to="/login" replace />;
     }
 
     if (user.role !== "admin") {
-        toast.error("Admin access only");
         return <Navigate to="/" replace />;
     }
 
     return children;
+
 }
 
 export default AdminRoute;
