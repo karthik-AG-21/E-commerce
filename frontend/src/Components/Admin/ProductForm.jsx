@@ -1,8 +1,10 @@
+// UPDATED: Import useEffect for image preview cleanup
+import { useState, useEffect } from "react";
 
-import { useState } from "react";
 
-
- function getInitialFormData(product) {
+// UPDATED: Removed thumbnail from normal form data.
+// Thumbnail is now handled separately as a File object.
+function getInitialFormData(product) {
     return {
         title: product?.title ?? "",
         description: product?.description ?? "",
@@ -11,15 +13,35 @@ import { useState } from "react";
         price: product?.price ?? "",
         stock: product?.stock ?? "",
         rating: product?.rating ?? "",
-        thumbnail: product?.thumbnail ?? "",
     };
 }
 
-function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
 
-    const [formData, setFormData] = useState(() => getInitialFormData(product));
+function ProductForm({
+    product,
+    onClose,
+    onSubmit,
+    isSubmitting = false,
+}) {
 
-   
+    const [formData, setFormData] = useState(
+        () => getInitialFormData(product)
+    );
+
+    // ADDED: Store the selected image File object
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    // ADDED: Store the image preview URL
+    // During editing, initially display the existing Cloudinary image
+    const [previewUrl, setPreviewUrl] = useState(
+        product?.thumbnail?.url ?? ""
+    );
+
+    // ADDED: Image validation error
+    const [imageError, setImageError] = useState("");
+
+
+    // Existing form input handler
     function handleChange(e) {
         const { name, value } = e.target;
 
@@ -29,10 +51,93 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
         }));
     }
 
-    function handleSubmit(e) {
-        e.preventDefault();
-        onSubmit(formData);
+
+    // ADDED: Handle image preview and cleanup
+    useEffect(() => {
+
+        // If no new image is selected, display existing image
+        if (!selectedImage) {
+            setPreviewUrl(product?.thumbnail?.url ?? "");
+            return;
+        }
+
+        // Create temporary browser URL for selected image
+        const objectUrl = URL.createObjectURL(selectedImage);
+
+        setPreviewUrl(objectUrl);
+
+        // Cleanup temporary URL
+        return () => {
+            URL.revokeObjectURL(objectUrl);
+        };
+
+    }, [selectedImage, product?.thumbnail?.url]);
+
+
+    // ADDED: Handle image selection
+    function handleImageChange(e) {
+
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        // Allowed image formats
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+        ];
+
+        // Validate image format
+        if (!allowedTypes.includes(file.type)) {
+
+            setImageError(
+                "Only JPEG, PNG and WEBP images are allowed"
+            );
+
+            setSelectedImage(null);
+            e.target.value = "";
+
+            return;
+        }
+
+        // Validate image size (5 MB)
+        if (file.size > 5 * 1024 * 1024) {
+
+            setImageError(
+                "Image size must not exceed 5 MB"
+            );
+
+            setSelectedImage(null);
+            e.target.value = "";
+
+            return;
+        }
+
+        // Valid image
+        setImageError("");
+        setSelectedImage(file);
     }
+
+
+    // UPDATED: Handle form submission
+    function handleSubmit(e) {
+
+        e.preventDefault();
+
+        // Image is mandatory when creating a product
+        if (!product && !selectedImage) {
+            setImageError("Product thumbnail is required");
+            return;
+        }
+
+        // Send normal fields and selected File object
+        onSubmit({
+            ...formData,
+            thumbnail: selectedImage,
+        });
+    }
+
 
     const inputClass = `
         block w-full min-w-0 rounded-xl
@@ -45,11 +150,14 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
         sm:px-4
     `;
 
+
     const labelClass =
         "mb-2 block text-sm font-medium text-zinc-300";
 
+
     return (
         <div className="w-full min-w-0 p-3 sm:p-5">
+
             <form
                 onSubmit={handleSubmit}
                 className="
@@ -60,7 +168,10 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                     sm:p-6 lg:p-8
                 "
             >
+
+                {/* Form heading */}
                 <div className="mb-6">
+
                     <h2 className="text-xl font-semibold sm:text-2xl">
                         {product ? "Edit Product" : "Add New Product"}
                     </h2>
@@ -70,14 +181,19 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             ? "Update the product details below."
                             : "Enter the details to add a new product."}
                     </p>
+
                 </div>
 
+
                 <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
+
                     {/* Product Name */}
                     <div className="min-w-0">
+
                         <label htmlFor="title" className={labelClass}>
                             Product Name
                         </label>
+
                         <input
                             id="title"
                             name="title"
@@ -88,13 +204,17 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             autoComplete="off"
                             required
                         />
+
                     </div>
+
 
                     {/* Description */}
                     <div className="min-w-0">
+
                         <label htmlFor="description" className={labelClass}>
                             Description
                         </label>
+
                         <textarea
                             id="description"
                             name="description"
@@ -105,13 +225,17 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             rows={3}
                             required
                         />
+
                     </div>
+
 
                     {/* Category */}
                     <div className="min-w-0">
+
                         <label htmlFor="category" className={labelClass}>
                             Category
                         </label>
+
                         <input
                             id="category"
                             name="category"
@@ -121,13 +245,17 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             className={inputClass}
                             required
                         />
+
                     </div>
+
 
                     {/* Brand */}
                     <div className="min-w-0">
+
                         <label htmlFor="brand" className={labelClass}>
                             Brand
                         </label>
+
                         <input
                             id="brand"
                             name="brand"
@@ -137,13 +265,17 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             className={inputClass}
                             required
                         />
+
                     </div>
+
 
                     {/* Price */}
                     <div className="min-w-0">
+
                         <label htmlFor="price" className={labelClass}>
                             Price
                         </label>
+
                         <input
                             id="price"
                             name="price"
@@ -157,13 +289,17 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             className={inputClass}
                             required
                         />
+
                     </div>
+
 
                     {/* Stock */}
                     <div className="min-w-0">
+
                         <label htmlFor="stock" className={labelClass}>
                             Stock
                         </label>
+
                         <input
                             id="stock"
                             name="stock"
@@ -177,13 +313,17 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             className={inputClass}
                             required
                         />
+
                     </div>
+
 
                     {/* Rating */}
                     <div className="min-w-0">
+
                         <label htmlFor="rating" className={labelClass}>
                             Rating
                         </label>
+
                         <input
                             id="rating"
                             name="rating"
@@ -197,31 +337,75 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                             placeholder="0 - 5"
                             className={inputClass}
                         />
+
                     </div>
 
-                    {/* Thumbnail */}
+
+                    {/* UPDATED: Product Thumbnail Upload */}
                     <div className="min-w-0 md:col-span-2">
-                        <label htmlFor="thumbnail" className={labelClass}>
-                            Image URL
+
+                        <label
+                            htmlFor="thumbnail"
+                            className={labelClass}
+                        >
+                            Product Thumbnail
                         </label>
+
                         <input
                             id="thumbnail"
                             name="thumbnail"
-                            type="url"
-                            value={formData.thumbnail}
-                            onChange={handleChange}
-                            placeholder="https://example.com/image.jpg"
-                            className={inputClass}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleImageChange}
+                            className={`${inputClass} file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-white`}
                         />
+
+                        {/* ADDED: Image validation error */}
+                        {imageError && (
+                            <p className="mt-2 text-sm text-red-400">
+                                {imageError}
+                            </p>
+                        )}
+
+
+                        {/* ADDED: Image preview */}
+                        {previewUrl && (
+
+                            <div className="mt-4">
+
+                                <p className="mb-2 text-sm text-slate-400">
+                                    Image Preview
+                                </p>
+
+                                <img
+                                    src={previewUrl}
+                                    alt="Product preview"
+                                    className="
+                                        h-36 w-36
+                                        rounded-xl
+                                        border border-white/10
+                                        bg-white
+                                        object-contain
+                                        p-2
+                                    "
+                                />
+
+                            </div>
+
+                        )}
+
                     </div>
+
                 </div>
 
-                {/* Actions */}
+
+                {/* Form Actions */}
                 <div className="
                     mt-7 flex flex-col-reverse gap-3
                     border-t border-white/10 pt-5
                     sm:flex-row sm:justify-end
                 ">
+
                     <button
                         type="button"
                         onClick={onClose}
@@ -237,6 +421,7 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                     >
                         Cancel
                     </button>
+
 
                     <button
                         type="submit"
@@ -258,10 +443,14 @@ function ProductForm({ product,  onClose, onSubmit , isSubmitting = false,  }) {
                                 ? "Update Product"
                                 : "Add Product"}
                     </button>
+
                 </div>
+
             </form>
+
         </div>
     );
 }
+
 
 export default ProductForm;

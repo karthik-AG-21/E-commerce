@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import Order from "../models/orderSchema.js";
 import Product from "../models/productSchema.js";
 import User from "../models/userSchema.js";
+import uploadToCloudinary from "../utils/cloudinaryUpload.js";
+import deleteFromCloudinary from "../utils/cloudinaryDelete.js";
 
 
 export const getAllUsers = async (req, res) => {
@@ -36,7 +38,7 @@ export const getAllUsers = async (req, res) => {
         if (sort === "z-a") sortOption = { name: -1 };
         if (sort === "oldest-users") sortOption = { createdAt: 1 };
 
-        
+
         const totalUsers = await User.countDocuments(query);
 
         const users = await User.find(query).select("-password").sort(sortOption).skip((page - 1) * limit).limit(limit);
@@ -86,7 +88,7 @@ export const blockUser = async (req, res) => {
         }
 
         const user = await User.findOneAndUpdate({ _id: userId, role: { $ne: "admin" }, }, { $set: { isBlocked: status }, },
-            { returnDocument: "after" , runValidators: true, }).select("-password");
+            { returnDocument: "after", runValidators: true, }).select("-password");
 
         if (!user) {
             return res.status(404).json({
@@ -161,13 +163,16 @@ export const getAllProducts = async (req, res) => {
 };
 
 export const createProduct = async (req, res) => {
+
+    let uploadedImagePublicId = null;
+
     try {
         const sku = `PROD-${Date.now()}`;
 
         const { title, description, category, price, stock,
-            rating, brand, thumbnail, images } = req.body;
+            rating, brand } = req.body;
 
-        
+
         if (!title?.trim() || !description?.trim() || !category?.trim() || !brand?.trim() || !sku?.trim()) {
             return res.status(400).json({
                 success: false,
@@ -183,14 +188,27 @@ export const createProduct = async (req, res) => {
             });
         }
 
-        
-        if (stock == null || !Number.isFinite(Number(stock)) || Number(stock) < 0 ) {
-            return res.status(400).json({success: false, message: "Stock must be zero or greater", });
+
+        if (stock == null || !Number.isFinite(Number(stock)) || Number(stock) < 0) {
+            return res.status(400).json({ success: false, message: "Stock must be zero or greater", });
         }
 
 
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "Product thumbnail is required",
+            });
+        }
 
-        
+
+        const uploadedImage = await uploadToCloudinary(req.file.buffer);
+
+        uploadedImagePublicId = uploadedImage.public_id;
+
+
+
+
         const product = await Product.create({
             title: title.trim(),
             description: description.trim(),
@@ -199,9 +217,12 @@ export const createProduct = async (req, res) => {
             stock: Number(stock),
             rating: Number(rating ?? 0),
             brand: brand.trim(),
-            sku: sku,
-            thumbnail,
-            images: images ?? [],
+            sku,
+
+            thumbnail: {
+                url: uploadedImage.secure_url,
+                public_id: uploadedImage.public_id
+            }
         });
 
         return res.status(201).json({
@@ -210,6 +231,15 @@ export const createProduct = async (req, res) => {
             data: product,
         });
     } catch (error) {
+
+
+        if (uploadedImagePublicId) {
+            try {
+                await deleteFromCloudinary(uploadedImagePublicId);
+            } catch (cleanupError) {
+                console.error("Cloudinary cleanup failed:", cleanupError);
+            }
+        }
         console.error("Create product error:", error);
 
         // Mongoose validation
@@ -231,27 +261,20 @@ export const createProduct = async (req, res) => {
 
 
 export const updateProduct = async (req, res) => {
+
+    let uploadedImagePublicId = null;
+
     try {
         const { id } = req.params;
 
-        const {
-            title,
-            description,
-            category,
-            brand,
-            price,
-            stock,
-            rating,
-            thumbnail,
-            images,
-        } = req.body;
+        const { title, description, category, brand, price, stock, rating } = req.body;
 
-        
+
         if (!id || !mongoose.isObjectIdOrHexString(id)) {
-            return res.status(400).json({success: false, message: "Invalid product ID",});
+            return res.status(400).json({ success: false, message: "Invalid product ID", });
         }
 
-        
+
         const existingProduct = await Product.findById(id);
 
         if (!existingProduct) {
@@ -261,7 +284,7 @@ export const updateProduct = async (req, res) => {
             });
         }
 
-        
+
         if (!title?.trim() || !description?.trim() || !category?.trim() || !brand?.trim()) {
             return res.status(400).json({
                 success: false,
@@ -269,14 +292,14 @@ export const updateProduct = async (req, res) => {
             });
         }
 
-        
-        if ( price === undefined || price === null || price === "" || !Number.isFinite(Number(price)) || Number(price) <= 0) {
 
-            return res.status(400).json({success: false, message: "Price must be greater than 0",});
+        if (price === undefined || price === null || price === "" || !Number.isFinite(Number(price)) || Number(price) <= 0) {
+
+            return res.status(400).json({ success: false, message: "Price must be greater than 0", });
         }
 
         // Validate stock
-        if (stock === undefined || stock === null || stock === "" || !Number.isInteger(Number(stock)) || Number(stock) < 0 ) {
+        if (stock === undefined || stock === null || stock === "" || !Number.isInteger(Number(stock)) || Number(stock) < 0) {
 
             return res.status(400).json({
                 success: false,
@@ -284,15 +307,15 @@ export const updateProduct = async (req, res) => {
             });
         }
 
-        
-        if ( rating !== undefined &&(!Number.isFinite(Number(rating)) || Number(rating) < 0 || Number(rating) > 5 )) {
+
+        if (rating !== undefined && (!Number.isFinite(Number(rating)) || Number(rating) < 0 || Number(rating) > 5)) {
             return res.status(400).json({
                 success: false,
                 message: "Rating must be between 0 and 5",
             });
         }
 
-        
+
         const updateData = {
             title: title.trim(),
             description: description.trim(),
@@ -306,31 +329,75 @@ export const updateProduct = async (req, res) => {
             updateData.rating = Number(rating);
         }
 
-        if (thumbnail !== undefined) {
-            updateData.thumbnail = thumbnail;
+        if (req.file) {
+            const uploadedImage = await uploadToCloudinary(req.file.buffer)
+
+            uploadedImagePublicId = uploadedImage.public_id;
+
+            updateData.thumbnail = {
+                url: uploadedImage.secure_url,
+                public_id: uploadedImage.public_id
+            };
         }
 
-        if (images !== undefined) {
-            updateData.images = images;
-        }
 
-       
-        const updatedProduct = await Product.findByIdAndUpdate(id,
+        const updatedProduct = await Product.findByIdAndUpdate(
+            id,
             { $set: updateData },
             { returnDocument: "after", runValidators: true });
+
+
+        if (!updatedProduct) {
+            throw new Error("Product update failed");
+        }
+
+        if (req.file && existingProduct.thumbnail?.public_id) {
+            try {
+                const deleteResult = await deleteFromCloudinary(existingProduct.thumbnail.public_id);
+
+                if (deleteResult.result !== "ok" && deleteResult.result !== "not found") {
+
+                    console.error("Old Cloudinary image deletion unsuccessful:", deleteResult);
+                }
+
+            } catch (deleteError) {
+                console.error("Failed to delete old Cloudinary image:", deleteError);
+            }
+        }
 
         return res.status(200).json({
             success: true,
             message: "Product updated successfully",
-            data: updatedProduct,});
+            data: updatedProduct,
+        });
 
     } catch (error) {
         console.error("Update product error:", error);
 
+
+        if (uploadedImagePublicId) {
+
+            try {
+
+                await deleteFromCloudinary(uploadedImagePublicId);
+
+            } catch (cleanupError) {
+
+                console.error("New Cloudinary image cleanup failed:", cleanupError);
+
+            }
+        }
+
+        if (error.name === "ValidationError") {
+            return res.status(400).json({
+                success: false,
+                message: error.message,
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Failed to update product",
-            error: error.message,
         });
     }
 };
@@ -347,7 +414,7 @@ export const softDeleteProduct = async (req, res) => {
             { returnDocument: "after", runValidators: true });
 
         if (!product) {
-            return res.status(404).json({success: false, message: "Product not found",});
+            return res.status(404).json({ success: false, message: "Product not found", });
         }
 
         return res.status(200).json({
@@ -379,13 +446,15 @@ export const getTrashProducts = async (req, res) => {
             Product.countDocuments(query),
         ]);
 
-        return res.status(200).json({success: true, data: products,
-            pagination: { 
-                currentPage: page, 
+        return res.status(200).json({
+            success: true, data: products,
+            pagination: {
+                currentPage: page,
                 totalProducts,
-                 totalPages: Math.ceil(totalProducts / limit), 
-                 limit,
-                },});
+                totalPages: Math.ceil(totalProducts / limit),
+                limit,
+            },
+        });
 
     } catch (error) {
         return res.status(500).json({
@@ -405,16 +474,16 @@ export const restoreTrashProducts = async (req, res) => {
         );
 
         if (!product) {
-            return res.status(404).json({success: false,message: "Product not found"});
+            return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        res.status(200).json({success: true,message: "Product restored successfully",product});
+        res.status(200).json({ success: true, message: "Product restored successfully", product });
 
     } catch (error) {
 
         console.log(error);
 
-        res.status(500).json({success: false, message: "Internal server error"});
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
 
@@ -424,11 +493,34 @@ export const DeleteProduct = async (req, res) => {
 
         const { id } = req.params;
 
-        const product = await Product.findByIdAndDelete(id)
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid product ID"
+            });
+        }
+
+        const product = await Product.findById(id)
+
+        if (!product.isDeleted) {
+            return res.status(400).json({
+                success: false,
+                message: "Only deleted products can be permanently removed"
+            });
+        }
 
         if (!product) {
             return res.status(404).json({ success: false, message: "Product is not found" })
         }
+
+
+
+        if (product.thumbnail?.public_id) {
+            await deleteFromCloudinary(product.thumbnail?.public_id)
+        }
+
+        await Product.findByIdAndDelete(id);
+
 
         res.status(200).json({ success: true, message: "product deleted successfull" })
 
@@ -442,16 +534,16 @@ export const DeleteProduct = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
     try {
-        
-        const params = {...req.query, ...req.body,};
+
+        const params = { ...req.query, ...req.body, };
 
         const page = Math.max(1, parseInt(params.page, 10) || 1);
-        const limit = Math.min(100,Math.max(1, parseInt(params.limit, 10) || 8));
+        const limit = Math.min(100, Math.max(1, parseInt(params.limit, 10) || 8));
 
         const search = String(params.search || "").trim();
         const filter = String(params.filter || "").trim();
 
-       
+
         const sortOptions = {
             newest: { orderedAt: -1, _id: -1 },
             oldest: { orderedAt: 1, _id: 1 },
@@ -459,7 +551,7 @@ export const getAllOrders = async (req, res) => {
             "high-low": { totalAmount: -1, _id: -1 },
         };
 
-        
+
         const allowedStatuses = [
             "Pending",
             "Processing",
@@ -474,10 +566,10 @@ export const getAllOrders = async (req, res) => {
             query.status = filter;
         }
 
-        
+
         const sort = sortOptions[filter] || sortOptions.newest;
 
-        
+
         if (search) {
             const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -540,13 +632,13 @@ export const updateOrderStatus = async (req, res) => {
 
         if (!validStatuses.includes(status)) {
 
-            return res.status(400).json({success: false, message: "Invalid order status" });
+            return res.status(400).json({ success: false, message: "Invalid order status" });
         }
 
         const order = await Order.findOneAndUpdate(
-            {_id: orderId,user: userId,},
-            {$set: { status: status.toLowerCase() },},
-            { returnDocuments: true,  runValidators: true  }
+            { _id: orderId, user: userId, },
+            { $set: { status: status.toLowerCase() }, },
+            { returnDocuments: true, runValidators: true }
         );
 
         if (!order) {

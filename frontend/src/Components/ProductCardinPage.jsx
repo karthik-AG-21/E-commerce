@@ -47,7 +47,7 @@ function ProductCards({ product }) {
 
             <div className="h-48 flex justify-center items-center p-6">
 
-                <img src={product?.images?.[2] || product?.images?.[1] || product?.images?.[0] || product?.thumbnail}
+                <img src={ product?.thumbnail?.url || product?.images?.[2] || product?.images?.[1] || product?.images?.[0] }
                     alt={product.title}
                     className="w-full h-40 object-contain transition duration-300 hover:scale-105" />
 

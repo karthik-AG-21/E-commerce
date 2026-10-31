@@ -190,7 +190,7 @@ return (
                                                         <div className="flex min-w-0 items-center gap-3">
                                                             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white p-1.5">
                                                                 <img
-                                                                    src={product.thumbnail || product.images?.[0]}
+                                                                    src={product.thumbnail?.url || product.images?.[0]}
                                                                     alt={product.title}
                                                                     loading="lazy"
                                                                     className="h-full w-full object-contain"

@@ -92,13 +92,14 @@ const productSchema = new mongoose.Schema({
     min: 1,
   },
 
-  images: {
-    type: [String],
-    default: [],
-  },
 
   thumbnail: {
-    type: String,
+    url: {
+      type: String
+    },
+    public_id: {
+      type: String
+    }
   },
   isDeleted: {
     type: Boolean,

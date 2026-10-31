@@ -139,23 +139,31 @@ function AdminProducts() {
         }
 
 
-        const productData = {
-            ...formData,
-            title: formData.title.trim(),
-            description: formData.description.trim(),
-            category: formData.category.trim(),
-            brand: formData.brand.trim(),
-            price: Number(formData.price),
-            stock: Number(formData.stock),
-            rating: formData.rating === "" ? 0 : Number(formData.rating),
-        };
+        // Create FormData
+        const productFormData = new FormData();
+
+        // Append product details
+        productFormData.append("title", formData.title.trim());
+        productFormData.append("description", formData.description.trim());
+        productFormData.append("category", formData.category.trim());
+        productFormData.append("brand", formData.brand.trim());
+        productFormData.append("price", Number(formData.price));
+        productFormData.append("stock", Number(formData.stock));
+        productFormData.append("rating",
+            formData.rating === "" ? 0 : Number(formData.rating)
+        );
+
+        // Append image only when a new image is selected
+        if (formData.thumbnail instanceof File) {
+            productFormData.append("thumbnail", formData.thumbnail);
+        }
 
         // Edit existing product
         if (editingProduct) {
             updateProduct.mutate(
                 {
                     id: editingProduct._id,
-                    product: productData,
+                    product: productFormData,
                 },
                 {
                     onSuccess: () => {
@@ -168,7 +176,7 @@ function AdminProducts() {
         }
 
         // Add new product
-        addProduct.mutate(productData, {
+        addProduct.mutate(productFormData, {
             onSuccess: () => {
                 handleCloseForm();
                 setCurrentPage(1);
@@ -360,7 +368,7 @@ function AdminProducts() {
                                                     <div className="flex min-w-0 items-center gap-3">
                                                         <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white p-1.5">
                                                             <img
-                                                                src={item.thumbnail || item.images?.[0]}
+                                                                src={item.thumbnail?.url || item.images?.[0]}
                                                                 alt={item.title}
                                                                 loading="lazy"
                                                                 className="h-full w-full object-contain"
