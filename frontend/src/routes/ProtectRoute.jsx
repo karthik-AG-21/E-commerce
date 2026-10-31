@@ -28,12 +28,10 @@ import { Navigate } from "react-router-dom";
 function ProtectedRoute({ children }) {
 let user = null;
 
-
 try {
-    const storedUser = localStorage.getItem("user");
-    user = storedUser ? JSON.parse(storedUser) : null;
+    user = JSON.parse(localStorage.getItem("user"));
 } catch {
-    user = null;
+    // Invalid user data
 }
 
 if (!user || typeof user !== "object" || !user.id) {

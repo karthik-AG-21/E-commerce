@@ -30,12 +30,11 @@ import { Navigate } from "react-router-dom";
 function AdminRoute({ children }) {
     let user = null;
 
-    try {
-        const storedUser = localStorage.getItem("user");
-        user = storedUser ? JSON.parse(storedUser) : null;
-    } catch {
-        user = null;
-    }
+try {
+    user = JSON.parse(localStorage.getItem("user"));
+} catch {
+    // Invalid user data
+}
 
     if (!user || typeof user !== "object" || !user.id) {
         return <Navigate to="/login" replace />;
