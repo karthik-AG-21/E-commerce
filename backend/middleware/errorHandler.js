@@ -1,6 +1,6 @@
 import multer from "multer";
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
 
     // Multer-specific errors
     if (err instanceof multer.MulterError) {

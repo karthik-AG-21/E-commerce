@@ -1,5 +1,6 @@
 // UPDATED: Import useEffect for image preview cleanup
-import { useState, useEffect } from "react";
+import { useState, } from "react";
+import ImagePreview from "./ImagePreview";
 
 
 // UPDATED: Removed thumbnail from normal form data.
@@ -31,11 +32,7 @@ function ProductForm({
     // ADDED: Store the selected image File object
     const [selectedImage, setSelectedImage] = useState(null);
 
-    // ADDED: Store the image preview URL
-    // During editing, initially display the existing Cloudinary image
-    const [previewUrl, setPreviewUrl] = useState(
-        product?.thumbnail?.url ?? ""
-    );
+
 
     // ADDED: Image validation error
     const [imageError, setImageError] = useState("");
@@ -53,25 +50,25 @@ function ProductForm({
 
 
     // ADDED: Handle image preview and cleanup
-    useEffect(() => {
+    // useEffect(() => {
 
-        // If no new image is selected, display existing image
-        if (!selectedImage) {
-            setPreviewUrl(product?.thumbnail?.url ?? "");
-            return;
-        }
+    //     // If no new image is selected, display existing image
+    //     if (!selectedImage) {
+    //         setPreviewUrl(product?.thumbnail?.url ?? "");
+    //         return;
+    //     }
 
-        // Create temporary browser URL for selected image
-        const objectUrl = URL.createObjectURL(selectedImage);
+    //     // Create temporary browser URL for selected image
+    //     const objectUrl = URL.createObjectURL(selectedImage);
 
-        setPreviewUrl(objectUrl);
+    //     setPreviewUrl(objectUrl);
 
-        // Cleanup temporary URL
-        return () => {
-            URL.revokeObjectURL(objectUrl);
-        };
+    //     // Cleanup temporary URL
+    //     return () => {
+    //         URL.revokeObjectURL(objectUrl);
+    //     };
 
-    }, [selectedImage, product?.thumbnail?.url]);
+    // }, [selectedImage, product?.thumbnail?.url]);
 
 
     // ADDED: Handle image selection
@@ -368,31 +365,12 @@ function ProductForm({
                         )}
 
 
-                        {/* ADDED: Image preview */}
-                        {previewUrl && (
+                        <ImagePreview
+                            selectedImage={selectedImage}
+                            existingImage={product?.thumbnail?.url}
+                        />
 
-                            <div className="mt-4">
 
-                                <p className="mb-2 text-sm text-slate-400">
-                                    Image Preview
-                                </p>
-
-                                <img
-                                    src={previewUrl}
-                                    alt="Product preview"
-                                    className="
-                                        h-36 w-36
-                                        rounded-xl
-                                        border border-white/10
-                                        bg-white
-                                        object-contain
-                                        p-2
-                                    "
-                                />
-
-                            </div>
-
-                        )}
 
                     </div>
 
