@@ -136,6 +136,7 @@ function Login() {
                                 placeholder="Enter your email"
                                 value={formData.email}
                                 onChange={handleChange}
+                                autoComplete="username"
                                 required
                                 className="w-full rounded-xl bg-[#23242C] border border-white/10 pl-11 pr-4 py-3
                                 text-white placeholder:text-zinc-500 outline-none transition
@@ -147,9 +148,9 @@ function Login() {
                     <div className="mb-6">
                         <div className="flex items-center justify-between">
                             <label htmlFor="password" className="text-white text-sm">Password</label>
-                            <span className="text-indigo-400 hover:text-indigo-300 text-sm cursor-pointer">
+                            {/* <span className="text-indigo-400 hover:text-indigo-300 text-sm cursor-pointer">
                                 Forgot password?
-                            </span>
+                            </span> */}
                         </div>
                         <div className="relative mt-2">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
@@ -160,6 +161,7 @@ function Login() {
                                 placeholder="Enter your password"
                                 value={formData.password}
                                 onChange={handleChange}
+                                autoComplete="current-password"
                                 required
                                 className="w-full rounded-xl bg-[#23242C] border border-white/10 pl-11 pr-12 py-3
                                 text-white placeholder:text-zinc-500 outline-none transition
@@ -195,13 +197,13 @@ function Login() {
                         <span className="flex-1 h-px bg-white/10"></span>
                     </div>
 
-                    <button
+                    {/* <button
                         type="button"
                         className="w-full py-3 rounded-xl border border-white/10 bg-[#23242C] text-white
                         font-medium transition hover:border-indigo-500/40"
                     >
                         Continue with Google
-                    </button>
+                    </button> */}
 
                     <p className="text-center text-zinc-400 mt-6">
                         Don't have an account?

@@ -166,6 +166,10 @@ const Register = () => {
                                         placeholder={placeholder}
                                         value={formData[name]}
                                         onChange={handleChange}
+                                        autoComplete={
+                                            name === "name" ? "name" :
+                                            name === "email" ? "email" :"new-password"
+                                        }
                                         className={`w-full rounded-xl bg-[#23242C] border pl-11 ${isPassword ? "pr-12" : "pr-4"} py-3
                                         text-white placeholder:text-zinc-500 outline-none transition
                                         focus:ring-2 ${errors[name]
