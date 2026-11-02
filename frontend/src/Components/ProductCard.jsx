@@ -7,12 +7,6 @@ import { useNavigate } from "react-router-dom";
 function ProductCard({ product }) {
     const navigate = useNavigate();
 
-    const image =
-        product?.images?.[2] ||
-        product?.images?.[1] ||
-        product?.images?.[0] ||
-        product?.thumbnail;
-
     return (
         <div
             className="relative mx-auto flex h-[430px] w-full min-w-0 max-w-[320px] flex-col 
@@ -38,7 +32,10 @@ function ProductCard({ product }) {
             {/* Product image */}
             <div className="flex min-h-0 flex-1 items-center justify-center px-3 pb-4 pt-8 sm:px-4 sm:pb-6">
                 <img
-                    src={image}
+                    src={product?.thumbnail?.url ||
+                        product?.images?.[2] ||
+                        product?.images?.[1] ||
+                        product?.images?.[0]}
                     alt={product.title}
                     loading="lazy"
                     className="h-48 w-full max-w-full object-contain sm:h-56"
