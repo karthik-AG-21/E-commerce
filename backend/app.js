@@ -157,9 +157,11 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-if (process.env.NODE_ENV !== "production") {
-    app.use(morgan("dev"));
-}
+// if (process.env.NODE_ENV !== "production") {
+//     app.use(morgan("dev"));
+// }
+
+app.use(morgan("combined"));
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -195,8 +197,8 @@ app.use("/admin", adminRouter);
 
 app.use(errorHandler)
 
-app.get("/", (req, res) => {
-    res.send("hello world");
-});
+// app.get("/", (req, res) => {
+//     res.send("hello world");
+// });
 
 export default app;

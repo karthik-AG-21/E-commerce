@@ -265,6 +265,12 @@ export const updateProduct = async (req, res) => {
     let uploadedImagePublicId = null;
 
     try {
+
+        console.log("STEP 1: Update request received");
+        console.log("Product ID:", req.params.id);
+        console.log("File received:", !!req.file);
+        console.log("Request body:", req.body);
+
         const { id } = req.params;
 
         const { title, description, category, brand, price, stock, rating } = req.body;
@@ -276,6 +282,8 @@ export const updateProduct = async (req, res) => {
 
 
         const existingProduct = await Product.findById(id);
+
+        console.log("STEP 2: Existing product found:", !!existingProduct);
 
         if (!existingProduct) {
             return res.status(404).json({
@@ -330,7 +338,12 @@ export const updateProduct = async (req, res) => {
         }
 
         if (req.file) {
+
+            console.log("STEP 3: Uploading image to Cloudinary");
+
             const uploadedImage = await uploadToCloudinary(req.file.buffer)
+
+            console.log("STEP 4: Cloudinary upload completed");
 
             uploadedImagePublicId = uploadedImage.public_id;
 
@@ -338,7 +351,11 @@ export const updateProduct = async (req, res) => {
                 url: uploadedImage.secure_url,
                 public_id: uploadedImage.public_id
             };
+
+            
         }
+
+        console.log("STEP 5: Updating MongoDB");
 
 
         const updatedProduct = await Product.findByIdAndUpdate(
@@ -346,6 +363,7 @@ export const updateProduct = async (req, res) => {
             { $set: updateData },
             { returnDocument: "after", runValidators: true });
 
+             console.log("STEP 6: MongoDB update completed");
 
         if (!updatedProduct) {
             throw new Error("Product update failed");
@@ -373,6 +391,9 @@ export const updateProduct = async (req, res) => {
 
     } catch (error) {
         console.error("Update product error:", error);
+        console.error("ERROR NAME:", error.name);
+        console.error("ERROR MESSAGE:", error.message);
+        console.error("ERROR STACK:", error.stack);
 
 
         if (uploadedImagePublicId) {

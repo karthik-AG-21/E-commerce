@@ -1,8 +1,10 @@
 import multer from "multer";
 
-const errorHandler = (err, req, res, _next) => {
+const errorHandler = (err, req, res, next) => {
 
-    // Multer-specific errors
+    console.error("Error:", err.message);
+
+    // Multer errors
     if (err instanceof multer.MulterError) {
 
         if (err.code === "LIMIT_FILE_SIZE") {
@@ -12,13 +14,20 @@ const errorHandler = (err, req, res, _next) => {
             });
         }
 
+        if (err.code === "LIMIT_UNEXPECTED_FILE") {
+            return res.status(400).json({
+                success: false,
+                message: "Unexpected file field"
+            });
+        }
+
         return res.status(400).json({
             success: false,
             message: err.message
         });
     }
 
-    // Custom fileFilter errors
+    // Custom file validation errors
     if (err.message === "Only JPEG, PNG and WEBP images are allowed") {
         return res.status(400).json({
             success: false,
@@ -26,7 +35,8 @@ const errorHandler = (err, req, res, _next) => {
         });
     }
 
-    console.error(err);
+    // Other errors
+    console.error("Stack:", err.stack);
 
     return res.status(500).json({
         success: false,
