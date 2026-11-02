@@ -4,6 +4,7 @@ import Product from "../models/productSchema.js";
 import User from "../models/userSchema.js";
 import uploadToCloudinary from "../utils/cloudinaryUpload.js";
 import deleteFromCloudinary from "../utils/cloudinaryDelete.js";
+import cloudinary from "../config/cloudinary.js";
 
 
 export const getAllUsers = async (req, res) => {
@@ -220,7 +221,11 @@ export const createProduct = async (req, res) => {
             sku,
 
             thumbnail: {
-                url: uploadedImage.secure_url,
+                url: cloudinary.url(uploadedImage.public_id, {
+                    effect: "background_removal",
+                    format: "png",
+                    secure: true
+                }),
                 public_id: uploadedImage.public_id
             }
         });
@@ -347,12 +352,19 @@ export const updateProduct = async (req, res) => {
 
             uploadedImagePublicId = uploadedImage.public_id;
 
+            const transformedImageUrl = cloudinary.url(uploadedImage.public_id, {
+                effect: "background_removal",
+                format: "png",
+                secure: true
+            });
+
+
             updateData.thumbnail = {
-                url: uploadedImage.secure_url,
+                url: transformedImageUrl,
                 public_id: uploadedImage.public_id
             };
 
-            
+
         }
 
         console.log("STEP 5: Updating MongoDB");
@@ -363,7 +375,7 @@ export const updateProduct = async (req, res) => {
             { $set: updateData },
             { returnDocument: "after", runValidators: true });
 
-             console.log("STEP 6: MongoDB update completed");
+        console.log("STEP 6: MongoDB update completed");
 
         if (!updatedProduct) {
             throw new Error("Product update failed");
