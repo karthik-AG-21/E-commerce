@@ -4,9 +4,11 @@ import SideBar from "../../Components/Admin/AdminSidebar";
 import CategoryChart from "../../Components/Admin/CategoryChart";
 import RevenueChart from "../../Components/Admin/RevenueChart";
 import StatCard from "../../Components/Admin/StatCard";
+import { PageError, PageLoader } from "../../Components/pageStatus";
 import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
 import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
 import useGetUsers from "../../hooks/Admin/useGetUsers";
+// import { PageLoader, PageError } from "../components/PageStatus";
 
 function Dashboard() {
     const limit = 1000;
@@ -14,18 +16,21 @@ function Dashboard() {
     const {
         data: users,
         isLoading,
+        isFetching,
         error,
     } = useGetUsers({ limit });
 
     const {
         data: products,
         isLoading: prodIsLoading,
+        isFetching:prodIsFetching,
         error: prodError,
     } = useGetAllProducts({ limit });
 
     const {
         data: orders,
         isLoading: orderIsLoading,
+        isFetching:orderIsFetching,
         error: orderError,
     } = useGetAllOrders({ limit });
 
@@ -39,24 +44,12 @@ function Dashboard() {
         )
     );
 
-    if (isLoading || prodIsLoading || orderIsLoading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-[#0F1420] px-4 text-white">
-                <p className="text-sm sm:text-base">
-                    Loading dashboard...
-                </p>
-            </div>
-        );
+    if (isFetching || prodIsFetching || orderIsFetching || isLoading || prodIsLoading || orderIsLoading) {
+        return <PageLoader message="Loading dashboard..." />;
     }
 
     if (error || prodError || orderError) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-[#0F1420] px-4 text-red-400">
-                <p className="text-sm sm:text-base">
-                    Failed to load dashboard data. Please try again.
-                </p>
-            </div>
-        );
+        return <PageError message="Failed to load dashboard data. Please try again." />;
     }
 
     return (

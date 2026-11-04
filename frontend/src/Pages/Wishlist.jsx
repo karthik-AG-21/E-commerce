@@ -134,11 +134,7 @@ function Wishlist() {
                         >
                             <img
                                 className="w-32 h-32 object-cover rounded-lg"
-                                src={
-                                    item.product?.images?.[0] ||
-                                    item.product?.images?.[1] ||
-                                    item.product?.images?.[2]
-                                }
+                            src={item?.thumbnail?.url || item.product?.images?.[0] || item.product?.images?.[1] || item.product?.images?.[2]}
                                 alt={item.product?.title}
                             />
 

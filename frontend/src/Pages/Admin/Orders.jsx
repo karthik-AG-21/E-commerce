@@ -4,6 +4,7 @@ import SideBar from "../../Components/Admin/AdminSidebar";
 import { useState } from "react";
 import useUpdateOrderStatus from "../../hooks/Admin/useUpdateOrderStatus";
 import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
+import { PageError, PageLoader } from "../../Components/pageStatus";
 
 
 
@@ -12,7 +13,7 @@ function AdminOrders() {
     const [filter, setFilter] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
 
-    const { data: response, isLoading, error,
+    const { data: response, isLoading, isFetching, error,
     } = useGetAllOrders({ page: currentPage, limit: 8, search, filter, });
 
     const allOrders = response?.data ?? [];
@@ -20,16 +21,12 @@ function AdminOrders() {
 
     const updateStatus = useUpdateOrderStatus();
 
-    if (isLoading) {
-        return <h1 className="bg-[#0F1420] min-h-screen text-white p-6">
-            Loading orders...
-        </h1>;
+    if (isFetching ||isLoading) {
+        return <PageLoader message="Loading orders..." />;
     }
 
     if (error) {
-        return <h1 className="bg-[#0F1420] min-h-screen text-red-400 p-6">
-            Failed to load orders.
-        </h1>;
+        return <PageError message="Failed to load orders." />;
     }
 
     function handleSearch(e) {
@@ -183,14 +180,14 @@ function AdminOrders() {
                                                 <td className="px-5 py-4">
                                                     <span
                                                         className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${item.status === "Delivered"
-                                                                ? "bg-emerald-500/10 text-emerald-400"
-                                                                : item.status === "Cancelled"
-                                                                    ? "bg-red-500/10 text-red-400"
-                                                                    : item.status === "Shipped"
-                                                                        ? "bg-blue-500/10 text-blue-400"
-                                                                        : item.status === "Processing"
-                                                                            ? "bg-indigo-500/10 text-indigo-300"
-                                                                            : "bg-amber-500/10 text-amber-400"
+                                                            ? "bg-emerald-500/10 text-emerald-400"
+                                                            : item.status === "Cancelled"
+                                                                ? "bg-red-500/10 text-red-400"
+                                                                : item.status === "Shipped"
+                                                                    ? "bg-blue-500/10 text-blue-400"
+                                                                    : item.status === "Processing"
+                                                                        ? "bg-indigo-500/10 text-indigo-300"
+                                                                        : "bg-amber-500/10 text-amber-400"
                                                             }`}
                                                     >
                                                         {item.status || "Pending"}

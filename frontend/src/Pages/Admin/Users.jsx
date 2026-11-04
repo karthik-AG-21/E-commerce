@@ -4,6 +4,7 @@ import useUpdateUserStatus from "../../hooks/Admin/useUpdateUserStatus"
 import SideBar from "../../Components/Admin/AdminSidebar"
 import Header from "../../Components/Admin/AdminHeader"
 import { CiFilter } from "react-icons/ci";
+import { PageError, PageLoader } from "../../Components/pageStatus";
 
 function AdminUsers() {
 
@@ -16,7 +17,8 @@ function AdminUsers() {
     const itemsPerPage = 8;
 
     const { data, isLoading, isError, error, isFetching } = useGetUsers({
-         page: currentPage, limit: itemsPerPage, search: debouncedSearch, filter, sort });
+        page: currentPage, limit: itemsPerPage, search: debouncedSearch, filter, sort
+    });
 
     console.log("Full response:", data);
     console.log("Users array:", data?.data);
@@ -24,6 +26,8 @@ function AdminUsers() {
     console.log("Error:", error);
 
     const updateUserStatus = useUpdateUserStatus();
+
+
 
 
     useEffect(() => {
@@ -34,6 +38,14 @@ function AdminUsers() {
 
         return () => clearTimeout(timer);
     }, [search]);
+
+    if (isLoading || isFetching) {
+        return <PageLoader message="Loading orders..." />;
+    }
+
+    if (error) {
+        return <PageError message="Failed to load orders." />;
+    }
 
     const users = data?.data ?? [];
     const totalPage = data?.pagination?.totalPages ?? 0;
@@ -202,14 +214,14 @@ function AdminUsers() {
                                                 <td className="px-5 py-4">
                                                     <span
                                                         className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium ${user.isBlocked
-                                                                ? "bg-red-500/10 text-red-400"
-                                                                : "bg-emerald-500/10 text-emerald-400"
+                                                            ? "bg-red-500/10 text-red-400"
+                                                            : "bg-emerald-500/10 text-emerald-400"
                                                             }`}
                                                     >
                                                         <span
                                                             className={`h-1.5 w-1.5 rounded-full ${user.isBlocked
-                                                                    ? "bg-red-400"
-                                                                    : "bg-emerald-400"
+                                                                ? "bg-red-400"
+                                                                : "bg-emerald-400"
                                                                 }`}
                                                         />
                                                         {user.isBlocked ? "Blocked" : "Active"}
@@ -222,8 +234,8 @@ function AdminUsers() {
                                                         disabled={updateUserStatus.isPending}
                                                         onClick={() => handleBlock(user)}
                                                         className={`min-h-9 min-w-20 rounded-lg px-3 py-2 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${user.isBlocked
-                                                                ? "bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20"
-                                                                : "bg-red-500/10 text-red-300 hover:bg-red-500/20"
+                                                            ? "bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20"
+                                                            : "bg-red-500/10 text-red-300 hover:bg-red-500/20"
                                                             }`}
                                                     >
                                                         {user.isBlocked ? "Unblock" : "Block"}

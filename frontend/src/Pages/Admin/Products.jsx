@@ -15,6 +15,7 @@ import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
 import { toast } from "react-toastify";
 import useDeleteProduct from "../../hooks/Admin/useSoftDeleteProd";
 import ConfirmDialog from "../../Components/Admin/ConfirmDialog";
+import { PageError, PageLoader } from "../../Components/pageStatus";
 
 
 function AdminProducts() {
@@ -32,30 +33,25 @@ function AdminProducts() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     // Fetch products from backend
-    const { data: response, isLoading: prodIsLoading, error: prodError,
+    const { data: response, isLoading: prodIsLoading, isFetched:isFetching , error: prodError,
     } = useGetAllProducts({ page: currentPage, limit: 8, search, filter, });
 
     const products = response?.data ?? [];
     const totalPage = response?.pagination?.totalPages ?? 1;
 
     // Loading state
+    
+
     if (prodIsLoading) {
-        return (
-            <div className="min-h-screen bg-[#0F1420] text-white p-10">
-                Loading products...
-            </div>
-        );
+        return <PageLoader message="Loading products..." />;
     }
 
-    // Error state
     if (prodError) {
         return (
-            <div className="min-h-screen bg-[#0F1420] text-white p-10">
-                Failed to load products.
-                <p className="text-red-400 text-sm mt-2">
-                    {prodError.message}
-                </p>
-            </div>
+            <PageError
+                message="Failed to load products."
+                details={prodError.message}
+            />
         );
     }
 

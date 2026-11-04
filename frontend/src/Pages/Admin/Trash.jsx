@@ -9,6 +9,7 @@ import ConfirmDialog from "../../Components/Admin/ConfirmDialog";
 import useGetTrashProducts from "../../hooks/Admin/useGetTrashProducts";
 import useRestoreProduct from "../../hooks/Admin/useRestoreProduct";
 import usePermanentDeleteProduct from "../../hooks/Admin/usePermanentDeleteProduct";
+import { PageError, PageLoader } from "../../Components/pageStatus";
 
 function AdminTrash() {
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,7 +18,9 @@ function AdminTrash() {
     const [selectedProductId, setSelectedProductId] = useState(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-    const { data: response, isLoading, error, } = useGetTrashProducts({ page: currentPage, limit, });
+    const { data: response, isLoading, isFetching , error, } = useGetTrashProducts({ page: currentPage, limit, });
+
+    
 
     const products = response?.data ?? [];
     const totalPages = response?.pagination?.totalPages ?? 1;
@@ -77,6 +80,14 @@ function AdminTrash() {
     function cancelPermanentDelete() {
         setIsConfirmOpen(false);
         setSelectedProductId(null);
+    }
+
+    if (isLoading || isFetching) {
+        return <PageLoader message="Loading orders..." />;
+    }
+
+    if (error) {
+        return <PageError message="Failed to load orders." />;
     }
 
     
