@@ -1,5 +1,5 @@
 
-import { useDispatch,  } from "react-redux";
+import { useDispatch, } from "react-redux";
 import { removeCart, setCart } from "../redux/cartSlice";
 import useUpdateCart from "../hooks/Cart/useUpdateCart";
 import useGetCart from "../hooks/useGetCart";
@@ -126,7 +126,7 @@ function Cart() {
                 Shopping Cart
             </h1>
 
-           <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-10">
+            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-10">
                 <div className="flex-1 flex flex-col gap-5">
                     {products.map((item) => {
                         const product = item.product ?? item;
@@ -148,12 +148,19 @@ function Cart() {
                             >
                                 <img
                                     src={
-                                        product.images?.[0] ??
-                                        product.images?.[1] ??
-                                        product.images?.[2] ??
+                                        // Cloudinary thumbnail object
+                                        product?.thumbnail?.url ||
+
+                                        // Direct thumbnail URL
+                                        product?.thumbnail ||
+
+                                        // Other product images
+                                        product?.images?.[0] ||
+                                        product?.images?.[1] ||
+                                        product?.images?.[2] ||
                                         ""
                                     }
-                                    alt={product.title ?? "Product"}
+                                    alt={product?.title || "Product"}
                                     className="w-32 h-32 object-cover rounded"
                                 />
 

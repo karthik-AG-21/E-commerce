@@ -363,9 +363,11 @@ function Checkout() {
                                         Number(item.quantity) || 0;
 
                                     const image =
-                                        product.images?.[0] ??
-                                        product.images?.[1] ??
-                                        product.thumbnail ??
+                                        product?.thumbnail?.url ||
+                                        product?.thumbnail ||
+                                        product?.images?.[0] ||
+                                        product?.images?.[1] ||
+                                        product?.images?.[2] ||
                                         "";
 
                                     return (

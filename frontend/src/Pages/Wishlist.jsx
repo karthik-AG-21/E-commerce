@@ -29,7 +29,7 @@ function Wishlist() {
     // Current page's products and pagination metadata
     const products = wishlistResponse?.items ?? [];
     const pagination = wishlistResponse?.pagination;
-    
+
 
     // Keep Redux compatible with your existing wishlist buttons
     useEffect(() => {
@@ -38,7 +38,7 @@ function Wishlist() {
         if (Array.isArray(wishlistProductIds)) {
             dispatch(setWishlistProductIds(wishlistProductIds));
         }
-    }, [wishlistResponse?.wishlistProductIds , dispatch]);
+    }, [wishlistResponse?.wishlistProductIds, dispatch]);
 
     const handleAddToCart = async (product) => {
         if (!product?._id) {
@@ -103,6 +103,7 @@ function Wishlist() {
         }
     };
 
+    console.log(products[0]?.thumbnail, "id")
     return (
         <div className="min-h-screen bg-[#0B0B0F] pt-24 px-5">
             <Header />
@@ -129,33 +130,46 @@ function Wishlist() {
                 <div className="max-w-5xl mx-auto flex flex-col gap-5">
                     {products.map((item) => (
                         <div
-                            key={item.product._id}
+                            key={item._id}
                             className="bg-[#191A20] text-white rounded-xl shadow-lg p-5 flex flex-col md:flex-row items-center gap-6"
                         >
                             <img
                                 className="w-32 h-32 object-cover rounded-lg"
-                            src={item?.thumbnail?.url || item.product?.images?.[0] || item.product?.images?.[1] || item.product?.images?.[2]}
-                                alt={item.product?.title}
+                                src={
+                                    // Cloudinary image
+                                    item?.product?.thumbnail?.url ||
+
+                                    // Direct thumbnail URL
+                                    item?.product?.thumbnail ||
+
+                                    // Product image URLs
+                                    item?.product?.images?.[0] ||
+                                    item?.product?.images?.[1] ||
+                                    item?.product?.images?.[2] ||
+
+                                    ""
+                                }
+                                alt={item?.product?.title || "Product"}
                             />
 
                             <div className="flex-1 flex flex-col gap-2">
                                 <h2 className="font-bold text-xl">
-                                    {item.product.title}
+                                    {item?.product?.title}
                                 </h2>
 
                                 <p className="text-green-600 font-bold text-lg">
-                                    ${item.product.price}
+                                    ${item?.product?.price}
                                 </p>
 
                                 <p className="text-gray-400">
-                                    Stock: {item.product.stock}
+                                    Stock: {item?.product?.stock}
                                 </p>
                             </div>
 
                             <div className="flex flex-col gap-3">
                                 <button
                                     onClick={() =>
-                                        handleAddToCart(item.product)
+                                        handleAddToCart(item?.product)
                                     }
                                     className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-bold transition"
                                 >
