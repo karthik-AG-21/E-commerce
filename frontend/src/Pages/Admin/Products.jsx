@@ -33,7 +33,7 @@ function AdminProducts() {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     // Fetch products from backend
-    const { data: response, isLoading: prodIsLoading, isFetched:isFetching , error: prodError,
+    const { data: response, isLoading: prodIsLoading,   error: prodError,
     } = useGetAllProducts({ page: currentPage, limit: 8, search, filter, });
 
     const products = response?.data ?? [];

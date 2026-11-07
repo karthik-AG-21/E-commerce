@@ -106,13 +106,21 @@ function Wishlist() {
         }
     };
 
-    {
-        isFetching && wishlistResponse && (
-            <p className="py-2 text-center text-sm text-gray-400">
-                Updating wishlist...
-            </p>
-        )
+
+    if (isLoading) {
+        return <PageLoader message="Loading your wishlist..." />;
     }
+
+    if (isError) {
+        return (
+            <PageError
+                message="Failed to load your wishlist."
+                onRetry={refetch}
+            />
+        );
+    }
+
+
 
     return (
         <div className="min-h-screen w-full overflow-x-clip bg-[#0B0B0F] px-4 pt-24 sm:px-5">
@@ -132,22 +140,16 @@ function Wishlist() {
                     </p>
                 </div>
 
+                {
+                    isFetching && wishlistResponse && (
+                        <p className="py-2 text-center text-sm text-gray-400">
+                            Updating wishlist...
+                        </p>
+                    )
+                }
+
                 {/* Loading */}
-                {isLoading && !wishlistResponse ? (
-                    <PageLoader
-                        message="Loading your wishlist..."
-                        className="min-h-[50vh]"
-                    />
-                ) : isError ? (
-
-                    /* Error */
-                    <PageError
-                        message="Failed to load your wishlist."
-                        onRetry={refetch}
-                        className="min-h-[50vh]"
-                    />
-
-                ) : products.length === 0 ? (
+                {products.length === 0 ? (
 
                     /* Empty Wishlist */
                     <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
