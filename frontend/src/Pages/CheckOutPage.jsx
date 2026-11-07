@@ -35,6 +35,19 @@ function Checkout() {
     // Support both { product, quantity } and direct product objects.
     const getProduct = (item) => item.product ?? item;
 
+    // if (isLoading) {
+    //     return <PageLoader message="Loading your cart..." />;
+    // }
+
+    // if (isError) {
+    //     return (
+    //         <PageError
+    //             message="Failed to load your cart."
+    //             onRetry={refetch}
+    //         />
+    //     );
+    // }
+
     // Calculate the displayed total.
     // The backend must independently calculate the actual order total.
     const totalPrice = cartItems.reduce((total, item) => {
