@@ -154,9 +154,9 @@ function Wishlist() {
                     /* Empty Wishlist */
                     <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
 
-                        <div className="mb-5 text-6xl">
+                        {/* <div className="mb-5 text-6xl">
                             ♡
-                        </div>
+                        </div> */}
 
                         <h2 className="text-2xl font-bold text-white">
                             Your wishlist is empty
