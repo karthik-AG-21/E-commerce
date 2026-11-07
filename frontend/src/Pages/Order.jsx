@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../Components/Header";
 import useGetOrders from "../hooks/useGetOrders";
+import { PageError, PageLoader } from "../Components/PageStatus";
 
 function Orders() {
     const userId = localStorage.getItem("userId");
@@ -60,37 +61,15 @@ function Orders() {
     }
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen bg-[#0B0B0F] text-white">
-                <Header />
-
-                <p className="text-center pt-32 text-zinc-400">
-                    Loading orders...
-                </p>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="min-h-screen bg-[#0B0B0F] text-white">
-                <Header />
-
-                <p className="text-center pt-32 text-red-400">
-                    Failed to load orders.
-                </p>
-
-                <div className="text-center mt-4">
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="bg-indigo-600 px-5 py-2 rounded-xl"
-                    >
-                        Retry
-                    </button>
-                </div>
-            </div>
-        );
-    }
+            return <PageLoader message="Loading products..." />;
+        }
+    
+        if (error) {
+            return (
+                <PageError message="Unable to load products. Please try again."
+                />
+            );
+        }
 
     return (
         <div className="min-h-screen bg-[#0B0B0F] text-white pt-24">

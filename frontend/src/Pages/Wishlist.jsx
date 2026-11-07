@@ -7,6 +7,7 @@ import useGetWishlist from "../hooks/useGetWishlist";
 import Header from "../Components/Header";
 import useUpdateWishlist from "../hooks/Wishlist/useUpdateWishlist";
 import { toast } from "react-toastify";
+import { PageError, PageLoader } from "../Components/PageStatus";
 
 function Wishlist() {
     const dispatch = useDispatch();
@@ -24,6 +25,8 @@ function Wishlist() {
         data: wishlistResponse,
         isLoading,
         isError,
+        isFetching,
+        refetch,
     } = useGetWishlist(user, page, limit);
 
     // Current page's products and pagination metadata
@@ -103,126 +106,174 @@ function Wishlist() {
         }
     };
 
-    console.log(products[0]?.thumbnail, "id")
+    {
+        isFetching && wishlistResponse && (
+            <p className="py-2 text-center text-sm text-gray-400">
+                Updating wishlist...
+            </p>
+        )
+    }
+
     return (
-        <div className="min-h-screen bg-[#0B0B0F] pt-24 px-5">
+        <div className="min-h-screen w-full overflow-x-clip bg-[#0B0B0F] px-4 pt-24 sm:px-5">
+
             <Header />
 
-            {isLoading && !wishlistResponse ? (
-                <div className="flex justify-center items-center h-96">
-                    <p className="text-white text-xl">
-                        Loading wishlist...
+            <main className="mx-auto max-w-5xl py-8">
+
+                {/* Page Heading */}
+                <div className="mb-8">
+                    <h1 className="text-2xl font-bold text-white sm:text-3xl">
+                        My Wishlist
+                    </h1>
+
+                    <p className="mt-2 text-sm text-gray-400">
+                        Your favorite products in one place.
                     </p>
                 </div>
-            ) : isError ? (
-                <div className="flex justify-center items-center h-96">
-                    <p className="text-white text-xl">
-                        Failed to load wishlist.
-                    </p>
-                </div>
-            ) : products.length === 0 ? (
-                <div className="flex justify-center items-center h-128">
-                    <h2 className="text-white text-3xl font-bold">
-                        Your wishlist is empty
-                    </h2>
-                </div>
-            ) : (
-                <div className="max-w-5xl mx-auto flex flex-col gap-5">
-                    {products.map((item) => (
-                        <div
-                            key={item._id}
-                            className="bg-[#191A20] text-white rounded-xl shadow-lg p-5 flex flex-col md:flex-row items-center gap-6"
-                        >
-                            <img
-                                className="w-32 h-32 object-cover rounded-lg"
-                                src={
-                                    // Cloudinary image
-                                    item?.product?.thumbnail?.url ||
 
-                                    // Direct thumbnail URL
-                                    item?.product?.thumbnail ||
+                {/* Loading */}
+                {isLoading && !wishlistResponse ? (
+                    <PageLoader
+                        message="Loading your wishlist..."
+                        className="min-h-[50vh]"
+                    />
+                ) : isError ? (
 
-                                    // Product image URLs
-                                    item?.product?.images?.[0] ||
-                                    item?.product?.images?.[1] ||
-                                    item?.product?.images?.[2] ||
+                    /* Error */
+                    <PageError
+                        message="Failed to load your wishlist."
+                        onRetry={refetch}
+                        className="min-h-[50vh]"
+                    />
 
-                                    ""
-                                }
-                                alt={item?.product?.title || "Product"}
-                            />
+                ) : products.length === 0 ? (
 
-                            <div className="flex-1 flex flex-col gap-2">
-                                <h2 className="font-bold text-xl">
-                                    {item?.product?.title}
-                                </h2>
+                    /* Empty Wishlist */
+                    <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
 
-                                <p className="text-green-600 font-bold text-lg">
-                                    ${item?.product?.price}
-                                </p>
+                        <div className="mb-5 text-6xl">
+                            ♡
+                        </div>
 
-                                <p className="text-gray-400">
-                                    Stock: {item?.product?.stock}
-                                </p>
-                            </div>
+                        <h2 className="text-2xl font-bold text-white">
+                            Your wishlist is empty
+                        </h2>
 
-                            <div className="flex flex-col gap-3">
-                                <button
-                                    onClick={() =>
-                                        handleAddToCart(item?.product)
+                        <p className="mt-3 max-w-sm text-gray-400">
+                            You haven't added any products to your wishlist yet.
+                            Start exploring and save your favorites!
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    /* Wishlist Products */
+                    <div className="flex flex-col gap-5">
+
+                        {products.map((item) => (
+                            <div
+                                key={item._id}
+                                className="flex flex-col items-center gap-5 rounded-xl border border-white/10 bg-[#191A20] p-5 text-white shadow-lg md:flex-row"
+                            >
+
+                                {/* Image */}
+                                <img
+                                    className="h-36 w-36 rounded-lg bg-[#0B0B0F] object-contain p-2"
+                                    src={
+                                        item?.product?.thumbnail?.url ||
+                                        item?.product?.thumbnail ||
+                                        item?.product?.images?.[0] ||
+                                        ""
                                     }
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-bold transition"
+                                    alt={item?.product?.title || "Product"}
+                                />
+
+                                {/* Details */}
+                                <div className="flex flex-1 flex-col gap-2 text-center md:text-left">
+
+                                    <h2 className="text-xl font-bold">
+                                        {item?.product?.title}
+                                    </h2>
+
+                                    <p className="text-lg font-bold text-green-500">
+                                        ${item?.product?.price}
+                                    </p>
+
+                                    <p className="text-sm text-gray-400">
+                                        Stock: {item?.product?.stock}
+                                    </p>
+
+                                </div>
+
+                                {/* Buttons */}
+                                <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto md:flex-col">
+
+                                    <button
+                                        onClick={() =>
+                                            handleAddToCart(item?.product)
+                                        }
+                                        className="rounded-lg bg-indigo-600 px-5 py-3 font-bold text-white transition hover:bg-indigo-700"
+                                    >
+                                        Add to Cart
+                                    </button>
+
+                                    <button
+                                        onClick={() =>
+                                            handleRemoveWishlist(item)
+                                        }
+                                        className="rounded-lg bg-zinc-700 px-5 py-3 font-bold text-white transition hover:bg-zinc-600"
+                                    >
+                                        Remove
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        ))}
+
+                        {/* Pagination */}
+                        {pagination && pagination.totalPages > 0 && (
+                            <div className="flex flex-wrap items-center justify-center gap-4 py-8 text-white">
+
+                                <button
+                                    disabled={!pagination.hasPrevPage}
+                                    onClick={() =>
+                                        setPage((prev) =>
+                                            Math.max(1, prev - 1)
+                                        )
+                                    }
+                                    className="rounded-lg bg-indigo-600 px-5 py-2 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
-                                    Add to Cart
+                                    Previous
                                 </button>
 
+                                <span className="text-sm text-gray-300">
+                                    Page {pagination.currentPage} of{" "}
+                                    {pagination.totalPages}
+                                </span>
+
                                 <button
+                                    disabled={!pagination.hasNextPage}
                                     onClick={() =>
-                                        handleRemoveWishlist(item)
+                                        setPage((prev) => prev + 1)
                                     }
-                                    className="bg-zinc-700 hover:bg-zinc-600 text-white px-5 py-2 rounded-lg font-bold transition"
+                                    className="rounded-lg bg-indigo-600 px-5 py-2 hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
-                                    Remove
+                                    Next
                                 </button>
+
                             </div>
-                        </div>
-                    ))}
+                        )}
 
-                    {/* Pagination controls */}
-                    {pagination && pagination.totalPages > 0 && (
-                        <div className="flex justify-center items-center gap-4 py-8 text-white">
-                            <button
-                                disabled={!pagination.hasPrevPage}
-                                onClick={() =>
-                                    setPage((prev) =>
-                                        Math.max(1, prev - 1)
-                                    )
-                                }
-                                className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                            >
-                                Previous
-                            </button>
+                    </div>
+                )}
 
-                            <span>
-                                Page {pagination.currentPage} of{" "}
-                                {pagination.totalPages}
-                            </span>
-
-                            <button
-                                disabled={!pagination.hasNextPage}
-                                onClick={() =>
-                                    setPage((prev) => prev + 1)
-                                }
-                                className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                            >
-                                Next
-                            </button>
-                        </div>
-                    )}
-                </div>
-            )}
+            </main>
         </div>
     );
+
 }
 
 export default Wishlist;

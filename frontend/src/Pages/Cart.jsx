@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import Header from "../Components/Header";
+import { PageError, PageLoader } from "../Components/PageStatus";
 
 function Cart() {
     const navigate = useNavigate();
@@ -17,7 +18,7 @@ function Cart() {
     const [page, setPage] = useState(1);
     const limit = 5;
 
-    const { data: cart, isLoading, isFetching } = useGetCart(user, page, limit);
+    const { data: cart, isLoading, isFetching , error } = useGetCart(user, page, limit);
 
     const { data: allCart } = useGetCart(user, 1, 10000);
 
@@ -83,26 +84,15 @@ function Cart() {
     };
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen bg-[#0B0B0F] pt-24">
-                <Header />
-                <p className="text-white text-center">
-                    Loading cart...
-                </p>
-            </div>
-        );
-    }
-
-    if (!isLoading && !isFetching && products.length === 0) {
-        return (
-            <div className="min-h-screen bg-[#0B0B0F] pt-24">
-                <Header />
-                <h1 className="text-white text-3xl font-bold text-center mt-20">
-                    Your cart is empty
-                </h1>
-            </div>
-        );
-    }
+            return <PageLoader message="Loading products..." />;
+        }
+    
+        if (error) {
+            return (
+                <PageError message="Unable to load products. Please try again."
+                />
+            );
+        }
 
     const allProducts = allCart?.items ?? [];
 

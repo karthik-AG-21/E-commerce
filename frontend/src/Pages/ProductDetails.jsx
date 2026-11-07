@@ -7,6 +7,7 @@ import { MdVerified } from "react-icons/md";
 import Footer from "../Components/Footer";
 import AddToCartButton from "../Components/AddToCartButton";
 import Header from "../Components/Header";
+import { PageLoader , PageError } from "../Components/PageStatus";
 
 function ProductDetails() {
     const navigate = useNavigate();
@@ -15,22 +16,14 @@ function ProductDetails() {
     const { data, isLoading, error } = useProductById(id);
 
     if (isLoading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-[#0B0B0F] px-4 text-center">
-                <h1 className="text-xl font-bold text-white sm:text-2xl">
-                    Loading Product...
-                </h1>
-            </div>
-        );
+        return <PageLoader message="Loading products..." />;
     }
 
-    if (error || !data) {
+    if (error) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-[#0B0B0F] px-4 text-center">
-                <h1 className="text-xl text-red-400 sm:text-2xl">
-                    Something went wrong...
-                </h1>
-            </div>
+            <PageError
+                message="Unable to load products. Please try again."
+            />
         );
     }
 

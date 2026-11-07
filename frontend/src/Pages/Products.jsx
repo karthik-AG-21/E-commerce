@@ -17,6 +17,7 @@ import useProducts from "../hooks/useProducts";
 import { useDispatch } from "react-redux";
 import useGetWishlist from "../hooks/useGetWishlist";
 import { setWishlistProductIds } from "../redux/wishlistSlice";
+import { PageLoader, PageError } from "../Components/PageStatus";
 
 function Products() {
     const navigate = useNavigate();
@@ -41,21 +42,21 @@ function Products() {
     const [sort, setSort] = useState("newest");
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
-    const [pageState, setPageState] = useState({category , page: 1});
+    const [pageState, setPageState] = useState({ category, page: 1 });
 
-    const page = pageState.category === category ? pageState.page: 1;
+    const page = pageState.category === category ? pageState.page : 1;
 
     const limit = 12;
 
     // Debounce search to avoid calling the API on every keystroke
     useEffect(() => {
-    const timer = setTimeout(() => {
-        setDebouncedSearch(search.trim());
-        setPageState({ category, page: 1 });
-    }, 400);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search.trim());
+            setPageState({ category, page: 1 });
+        }, 400);
 
-    return () => clearTimeout(timer);
-}, [search, category]);
+        return () => clearTimeout(timer);
+    }, [search, category]);
 
     // Reset page when category changes
     // useEffect(() => {
@@ -63,8 +64,8 @@ function Products() {
     // }, [category]);
 
     // Fetch filtered products from backend
-    const {data,isLoading,isFetching, error, } = 
-    useProducts({category: category || "all",  search: debouncedSearch,  brand, sort,  page,  limit, });
+    const { data, isLoading, isFetching, error, } =
+        useProducts({ category: category || "all", search: debouncedSearch, brand, sort, page, limit, });
 
     // Backend response: { success, data, pagination }
     const products = data?.data ?? [];
@@ -82,47 +83,41 @@ function Products() {
     };
 
     const handleCategoryChange = (e) => {
-    const value = e.target.value;
+        const value = e.target.value;
 
-    const nextCategory = value === "all" ? undefined : value;
+        const nextCategory = value === "all" ? undefined : value;
 
-    setPageState({
-        category: nextCategory,
-        page: 1
-    });
+        setPageState({
+            category: nextCategory,
+            page: 1
+        });
 
-    navigate(
-        value === "all"
-            ? "/products"
-            : `/products/${value}`
-    );
-};
+        navigate(
+            value === "all"
+                ? "/products"
+                : `/products/${value}`
+        );
+    };
 
     const clearFilter = () => {
-    setSearch("");
-    setDebouncedSearch("");
-    setBrand("all");
-    setSort("newest");
-    setPageState({ category: undefined, page: 1 });
-    navigate("/products");
-};
+        setSearch("");
+        setDebouncedSearch("");
+        setBrand("all");
+        setSort("newest");
+        setPageState({ category: undefined, page: 1 });
+        navigate("/products");
+    };
 
     if (isLoading) {
-        return (
-            <div className="flex min-h-[60vh] w-full items-center justify-center bg-[#0B0B0F] px-4 text-center text-white">
-                Loading...
-            </div>
-        );
+        return <PageLoader message="Loading products..." />;
     }
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0B0B0F] text-red-500">
-                Something went wrong here.
-            </div>
+            <PageError message="Unable to load products. Please try again."
+            />
         );
     }
-
 
 
     return (
@@ -158,7 +153,7 @@ function Products() {
                     <div className="flex w-full flex-wrap items-center justify-center gap-3 px-4 py-8 text-white sm:gap-4 sm:py-10">
                         <button
                             disabled={!pagination.hasPrevPage}
-                            onClick={() => setPageState({category,page: page - 1})}
+                            onClick={() => setPageState({ category, page: page - 1 })}
                             className="rounded-lg border border-gray-600 bg-white px-3 py-2 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4"
                         >
                             Previous
@@ -170,7 +165,7 @@ function Products() {
 
                         <button
                             disabled={!pagination.hasNextPage}
-                            onClick={() => setPageState({category,page: page + 1})}
+                            onClick={() => setPageState({ category, page: page + 1 })}
                             className="rounded-lg border border-gray-600 bg-white px-3 py-2 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4"
                         >
                             Next
