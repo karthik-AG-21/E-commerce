@@ -15,7 +15,7 @@ import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
 import { toast } from "react-toastify";
 import useDeleteProduct from "../../hooks/Admin/useSoftDeleteProd";
 import ConfirmDialog from "../../Components/Admin/ConfirmDialog";
-import { PageError, PageLoader } from "../../Components/pageStatus";
+import { PageError, PageLoader } from "../../Components/PageStatus";
 
 
 function AdminProducts() {

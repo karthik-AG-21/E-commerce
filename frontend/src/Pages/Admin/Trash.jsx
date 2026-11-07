@@ -9,7 +9,7 @@ import ConfirmDialog from "../../Components/Admin/ConfirmDialog";
 import useGetTrashProducts from "../../hooks/Admin/useGetTrashProducts";
 import useRestoreProduct from "../../hooks/Admin/useRestoreProduct";
 import usePermanentDeleteProduct from "../../hooks/Admin/usePermanentDeleteProduct";
-import { PageError, PageLoader } from "../../Components/pageStatus";
+import { PageError, PageLoader } from "../../Components/PageStatus";
 
 function AdminTrash() {
     const [currentPage, setCurrentPage] = useState(1);

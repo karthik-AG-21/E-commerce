@@ -4,7 +4,7 @@ import useUpdateUserStatus from "../../hooks/Admin/useUpdateUserStatus"
 import SideBar from "../../Components/Admin/AdminSidebar"
 import Header from "../../Components/Admin/AdminHeader"
 import { CiFilter } from "react-icons/ci";
-import { PageError, PageLoader } from "../../Components/pageStatus";
+import { PageError, PageLoader } from "../../Components/PageStatus";
 
 function AdminUsers() {
 

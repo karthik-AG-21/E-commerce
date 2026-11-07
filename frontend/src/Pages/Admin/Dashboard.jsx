@@ -4,7 +4,7 @@ import SideBar from "../../Components/Admin/AdminSidebar";
 import CategoryChart from "../../Components/Admin/CategoryChart";
 import RevenueChart from "../../Components/Admin/RevenueChart";
 import StatCard from "../../Components/Admin/StatCard";
-import { PageError, PageLoader } from "../../Components/pageStatus";
+import { PageError, PageLoader } from "../../Components/PageStatus";
 import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
 import useGetAllProducts from "../../hooks/Admin/useGetAllProducts";
 import useGetUsers from "../../hooks/Admin/useGetUsers";

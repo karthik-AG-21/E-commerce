@@ -4,7 +4,7 @@ import SideBar from "../../Components/Admin/AdminSidebar";
 import { useState } from "react";
 import useUpdateOrderStatus from "../../hooks/Admin/useUpdateOrderStatus";
 import useGetAllOrders from "../../hooks/Admin/useGetAllOrders";
-import { PageError, PageLoader } from "../../Components/pageStatus";
+import { PageError, PageLoader } from "../../Components/PageStatus";
 
 
 
